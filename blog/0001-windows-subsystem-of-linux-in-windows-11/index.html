@@ -1,0 +1,276 @@
+<!DOCTYPE html><html lang="it" data-bs-theme="dark"> <head><!-- 
+		preconnect Ottimizza le connessioni esterne 
+		I file di Bootstrap vengono caricati da cdn.jsdelivr.net. Il browser perde tempo a "cercare" dove si trova questo server (DNS lookup) e a stabilire una connessione sicura.
+		Soluzione: Aggiungi queste due righe in cima al tuo <head>, prima di ogni altra cosa: 
+	--><link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v6.1.3"><title>Windows Subsystem of Linux in Windows 11 | Pablo Dev</title><meta name="description" content="In questo articolo aniamo a esplorare l'utilizzo di Windows Subsystem of Linux in Windows, andando a vedere molti dei comandi più utili, con spiegazioni brevi e molti comandi per un utilizzo immediato"><link rel="canonical" href="https://pablodev.pubcloud.net/blog/0001-windows-subsystem-of-linux-in-windows-11/"><meta property="og:title" content="Windows Subsystem of Linux in Windows 11 | Pablo Dev"><meta property="og:description" content="In questo articolo aniamo a esplorare l'utilizzo di Windows Subsystem of Linux in Windows, andando a vedere molti dei comandi più utili, con spiegazioni brevi e molti comandi per un utilizzo immediato"><meta property="og:url" content="https://pablodev.pubcloud.net/blog/0001-windows-subsystem-of-linux-in-windows-11/"><meta property="og:type" content="article"><meta property="og:site_name" content="Pablo Dev"><meta property="og:image" content="https://pablodev.pubcloud.net/images/blog/win11-wsl.webp"><meta property="article:published_time" content="2026-01-01"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Windows Subsystem of Linux in Windows 11 | Pablo Dev"><meta name="twitter:description" content="In questo articolo aniamo a esplorare l'utilizzo di Windows Subsystem of Linux in Windows, andando a vedere molti dei comandi più utili, con spiegazioni brevi e molti comandi per un utilizzo immediato"><meta name="twitter:image" content="https://pablodev.pubcloud.net/images/blog/win11-wsl.webp"><link rel="sitemap" href="/sitemap-index.xml"><link rel="icon" href="data:,"><!-- blank favicon --><!-- Bootstrap Icons --><link rel="stylesheet" href="/vendors/bootstrap-icons-1.13.1/bootstrap-icons.min.css"><!-- stili nel file main.scss importati come ultimi --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","name":"Pablo Dev","url":"https://pablodev.pubcloud.net","description":"Sviluppo Software Web & AI Integration","datePublished":"2026-01-01","author":{"@type":"Person","name":"Pablo"}}</script><link rel="stylesheet" href="/_astro/BaseLayout.CFw3ldGN.css"></head> <body> <nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary border-bottom"> <div class="container"> <a class="navbar-brand fw-bold" href="/">Pablo Dev</a> <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button> <div class="collapse navbar-collapse" id="navbarNav"> <ul class="navbar-nav ms-auto gap-2"> <li class="nav-item"> <a class="nav-link" href="/">Home</a> </li> <li class="nav-item"><a class="nav-link" href="/blog">Blog</a></li>
+						<li class="nav-item"><a class="nav-link" href="/progetti">Progetti</a></li>
+						<li class="nav-item"> <a class="nav-link" href="https://www.youtube.com/@pablodev-yt" target="_blank" rel="noopener noreferrer"> <i class="bi bi-youtube me-1"></i>YouTube
+</a> </li>  </ul> </div> </div> </nav> <main>  <article class="container py-5"> <div class="mb-4"> <a href="/blog" class="btn btn-outline-secondary btn-sm"> <i class="bi bi-arrow-left me-1"></i>Tutti gli articoli
+</a> </div> <h1 class="mb-2 text-center">Windows Subsystem of Linux in Windows 11</h1> <p class="text-body-secondary mb-4 text-center"> <i class="bi bi-calendar3 me-1"></i> <time datetime="2026-01-01">1 gennaio 2026</time> </p> <div class="row justify-content-center"> <div class="col-lg-8"> <img src="/images/blog/win11-wsl.webp" alt="Windows 11 wsl" class="article-cover rounded mb-4"> <nav id="toc-container" class="card bg-body-tertiary border mt-4 mb-5 p-3" aria-label="Indice dei contenuti"> <h2 class="h4 text-uppercase text-body-secondary mb-3"> <i class="bi bi-list-ul me-1"></i> Indice
+</h2> <ul class="toc-list" id="toc-list"></ul> </nav> <div id="article-content"> <h2 id="funzionalità-di-base">Funzionalità di base</h2>
+<p>Per verificare che WSL 2 sia attivo e vedere la versione del kernel:</p>
+<pre><code>wsl --status
+wsl --version
+</code></pre>
+<p>Per vedere le distribuzioni installate</p>
+<pre><code>wsl --list --verbose
+</code></pre>
+<p>Il comando di seguito abilita i componenti necessari, installa il kernel Linux aggiornato e scarica Ubuntu come distribuzione predefinita. Riavvia il PC quando richiesto.</p>
+<pre><code>wsl --install
+</code></pre>
+<p>Per vedere le distribuzioni disponibili online</p>
+<pre><code>wsl --list --online
+</code></pre>
+<p>A questo punto per installare una distribuzione specifica</p>
+<pre><code>wsl --install -d Debian
+wsl --install -d kali-linux
+wsl --install -d openSUSE-Tumbleweed
+wsl --install -d AlmaLinux-9
+</code></pre>
+<p>Per avviare una distro</p>
+<pre><code># avvia distro di default
+wsl 
+
+# avvia una distro specifica
+wsl -d Debian
+wsl -d kali-linux
+</code></pre>
+<p>Cambiare la distribuzione predefinita associata al comando <code>wsl</code></p>
+<pre><code>wsl --set-default [nomedistro]
+</code></pre>
+<p>Per rimuovere una distribuzione</p>
+<pre><code>wsl --unregister [nomedistro]
+</code></pre>
+<p>Di seguito alcuni comandi di gestione generale</p>
+<pre><code># Fermare tutte le distro e il processo WSL
+wsl --shutdown
+
+# Terminare una singola distro
+wsl --terminate [nomedistro]
+
+# Aggiornare il kernel WSL
+wsl --update
+
+# Eseguire come utente specifico
+wsl -d [nomedistro] -u root
+
+# Spostare una distro su un altro disco
+wsl --export [nomedistro] D:\backup.tar
+wsl --unregister [nomedistro]
+wsl --import [nomedistro] D:\WSL\Ubuntu D:\backup.tar
+</code></pre>
+<h2 id="configurazione-di-wsl">Configurazione di WSL</h2>
+<p>Esistono due file di configurazione con scopi diversi.</p>
+<ul>
+<li><code>/etc/wsl.conf</code> — configurazione per singola distro</li>
+<li><code>%USERPROFILE%\.wslconfig</code> — configurazione globale</li>
+</ul>
+<p>Crea o modifica <code>/etc/wsl.conf</code> dentro la distro Linux:</p>
+<pre><code>sudo nano /etc/wsl.conf
+
+[boot]
+systemd=true          # abilita systemd (raccomandato)
+
+[user]
+default=mioutente     # utente predefinito al login
+
+[network]
+hostname=mylinux      # hostname della macchina virtuale
+generateResolvConf=true
+
+[interop]
+enabled=true          # permette di lanciare .exe da Linux
+appendWindowsPath=true # aggiunge il PATH di Windows a Linux
+</code></pre>
+<p>Dopo la modifica, riavvia la distro:</p>
+<pre><code>wsl --shutdown
+wsl -d [nomedistro]
+</code></pre>
+<p>Crea questo file in <code>C:\Users\[utente]\.wslconfig</code> (da PowerShell):</p>
+<pre><code>notepad $env:USERPROFILE\.wslconfig
+
+[wsl2]
+memory=8GB            # RAM massima assegnata
+processors=4          # numero di CPU virtuali
+swap=2GB              # spazio di swap
+diskSize=60GB         # dimensione massima del disco virtuale
+
+[experimental]
+sparseVhd=true        # disco virtuale a espansione automatica (risparmia spazio)
+autoMemoryReclaim=gradual  # rilascia RAM inutilizzata a Windows
+</code></pre>
+<p>Applica modifiche riavviando machina linux</p>
+<pre><code>wsl --shutdown
+</code></pre>
+<h2 id="interazione-tra-so">Interazione tra S.O.</h2>
+<h3 id="interazione-windows--linux">Interazione Windows → Linux</h3>
+<p>Eseguire comandi Linux direttamente da PowerShell/CMD</p>
+<pre><code># Eseguire un comando e tornare a Windows
+wsl ls -la /home
+
+# Usare una distro specifica
+wsl -d Debian -- apt list --installed
+
+# Pipe tra comandi Windows e Linux
+Get-Content C:\log.txt | wsl grep "ERROR"
+
+# Usare tool Linux su file Windows
+wsl sort -u &#x3C;&#x3C;&#x3C; "$(Get-Content C:\dati.txt)"
+</code></pre>
+<p>Il filesystem di ogni distro è accessibile tramite il percorso UNC:</p>
+<pre><code>\\wsl$\Ubuntu-24.04\home\utente\
+\\wsl$\Debian\etc\
+</code></pre>
+<p>Oppure direttamente da Esplora File digitando <code>\\wsl$</code> nella barra degli indirizzi.</p>
+<p>Da PowerShell puoi copiare file:</p>
+<pre><code>Copy-Item "C:\Documenti\file.txt" "\\wsl$\Ubuntu-24.04\home\utente\"
+</code></pre>
+<p>I dischi Windows vengono montati automaticamente in <code>/mnt/</code>:</p>
+<pre><code>ls /mnt/c/Users/         # Disco C:
+ls /mnt/d/               # Disco D: (se esiste)
+</code></pre>
+<p>Per montare manualmente un disco o una partizione:</p>
+<pre><code># Da PowerShell (Admin) — monta un disco fisico
+wsl --mount \\.\PHYSICALDRIVE1 --partition 1
+</code></pre>
+<h3 id="interazione-linux--windows">Interazione Linux → Windows</h3>
+<p>Eseguire eseguibili Windows da Linux. Grazie all’interoperabilità, puoi lanciare qualsiasi <code>.exe</code> da dentro WSL:</p>
+<pre><code># Aprire Esplora File nella directory corrente
+explorer.exe .
+
+# Aprire un file con il programma predefinito di Windows
+cmd.exe /c start documento.pdf
+
+# Usare notepad
+notepad.exe /mnt/c/Users/utente/file.txt
+
+# Usare winget per installare software Windows
+winget.exe install Git.Git
+</code></pre>
+<p>Accedere al filesystem Windows da Linux</p>
+<pre><code>cd /mnt/c/Users/tuoutente/Desktop
+ls /mnt/c/Program\ Files/
+</code></pre>
+<p>Copiare file da Linux a Windows</p>
+<pre><code>cp miofile.txt /mnt/c/Users/utente/Desktop/
+</code></pre>
+<p>Usare variabili d’ambiente di Windows</p>
+<pre><code># Leggere variabili d'ambiente Windows
+echo $WSLENV
+cmd.exe /c echo %APPDATA%
+</code></pre>
+<p>Per condividere variabili tra i due ambienti, imposta <code>WSLENV</code> in Windows:</p>
+<pre><code># Aggiunge MYVAR al bridge WSL (valore condiviso)
+[Environment]::SetEnvironmentVariable("WSLENV", "MYVAR/u", "User")
+</code></pre>
+<h2 id="rete-e-accesso-ai-servizi">Rete e Accesso ai Servizi</h2>
+<p>IP e hostname</p>
+<pre><code># IP della macchina WSL (varia a ogni riavvio)
+ip addr show eth0 | grep "inet "
+
+# IP della macchina Windows (gateway da Linux)
+ip route | grep default
+cat /etc/resolv.conf | grep nameserver
+</code></pre>
+<p>Accedere a un server avviato in Linux da Windows. Se avvii un server in WSL (es. <code>python3 -m http.server 8080</code>), puoi accedervi dal browser Windows su:</p>
+<pre><code>http://localhost:8080
+</code></pre>
+<p>WSL 2 in Windows 11 gestisce automaticamente il port forwarding per <code>localhost</code>.</p>
+<p>Accedere a un server Windows da Linux</p>
+<pre><code>
+# Usa l'IP del gateway (la macchina Windows)
+curl http://$(ip route | grep default | awk '{print $3}'):3000
+</code></pre>
+<p>Modalità Mirrored Networking (Windows 11 22H2+). Questa modalità avanzata fa sì che Linux e Windows condividano lo stesso stack di rete:</p>
+<pre><code>
+# In .wslconfig
+[wsl2]
+networkingMode=mirrored
+</code></pre>
+<p>Con questa opzione <code>localhost</code> funziona in entrambe le direzioni senza configurazioni aggiuntive.</p>
+<h2 id="eseguire-applicazioni-gui-wslg">Eseguire Applicazioni GUI (WSLg)</h2>
+<p>WSL 2 su Windows 11 include <strong>WSLg</strong>, che permette di eseguire applicazioni grafiche Linux nativamente senza configurazione aggiuntiva.</p>
+<pre><code># Installa e avvia Firefox
+sudo apt install firefox -y
+firefox &#x26;
+
+# Editor grafico
+sudo apt install gedit -y
+gedit &#x26;
+
+# Applicazioni GTK/Qt funzionano out-of-the-box
+sudo apt install gimp -y
+gimp &#x26;
+</code></pre>
+<p>Le finestre appaiono direttamente sul desktop Windows come normali applicazioni.</p>
+<h2 id="systemd-e-servizi">Systemd e Servizi</h2>
+<p>Con <code>systemd=true</code> in <code>wsl.conf</code> puoi gestire i servizi come su un normale Linux:</p>
+<pre><code># Avviare e abilitare SSH
+sudo systemctl start ssh
+sudo systemctl enable ssh
+sudo systemctl status ssh
+
+# Avviare Docker (senza Docker Desktop)
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Controllare tutti i servizi
+systemctl list-units --type=service --state=running
+</code></pre>
+<h2 id="importare-ed-esportare-distribuzioni">Importare ed Esportare Distribuzioni</h2>
+<p>Esportare una distro (backup)</p>
+<pre><code>wsl --export [nomedistro] C:\Backup\ubuntu-backup.tar
+</code></pre>
+<p>Importare una distro (ripristino o clonazione)</p>
+<pre><code>wsl --import MioUbuntu C:\WSL\MioUbuntu C:\Backup\ubuntu-backup.tar --version 2
+</code></pre>
+<p>Importare una distro personalizzata (es. Arch Linux/Rocky Linux)</p>
+<pre><code># Scarica il rootfs di Arch
+# Da https://gitlab.archlinux.org/archlinux/archlinux-docker/-/releases
+# Poi importa:
+wsl --import Arch C:\WSL\Arch C:\Downloads\archlinux-rootfs.tar.zst --version 2
+wsl -d Arch
+
+# esempio rockylinux
+wsl --import RockyLinux10 V:\WSL\RockyLinux10 "Z:\WSL\wsl_distro\Rocky-10-WSL-Base.latest.x86_64.wsl"
+
+# per eseguire la macchina appena importata
+wsl -d RockyLinux10
+</code></pre>
+<p>Per rockylinux10 abbiamo che:</p>
+<ul>
+<li><code>RockyLinux10</code> → il nome che vuoi dare alla distro in WSL</li>
+<li><code>V:\WSL\RockyLinux10</code> → la cartella dove WSL salverà il disco virtuale (<code>.vhdx</code>). Verrà creata automaticamente</li>
+<li><code>"Z:\WSL\..."</code> → il percorso del file sorgente</li>
+</ul>
+<h2 id="ottimizzazioni-e-prestazioni">Ottimizzazioni e prestazioni</h2>
+<p>Col tempo il file <code>.vhdx</code> cresce. Per compattarlo:</p>
+<pre><code># Prima, libera spazio dentro Linux
+wsl -d Ubuntu-24.04 -- bash -c "sudo fstrim -av"
+
+# Poi compatta da PowerShell (Admin)
+wsl --shutdown
+Optimize-VHD -Path "$env:LOCALAPPDATA\Packages\CanonicalGroupLimited.Ubuntu24.04LTS_79rhkp1fndgsc\LocalState\ext4.vhdx" -Mode Full
+</code></pre> </div> </div> </div> </article> <script type="module">const a=document.getElementById("article-content"),d=document.getElementById("toc-list"),r=document.getElementById("toc-container");if(a&&d&&r){const o=a.querySelectorAll("h2");o.length===0?r.style.display="none":o.forEach((e,n)=>{e.id||(e.id=`section-${n+1}`);const c=document.createElement("li"),t=document.createElement("a");t.href=`#${e.id}`,t.textContent=e.textContent??"",t.className="text-body-secondary",t.addEventListener("click",l=>{l.preventDefault();const i=document.getElementById(e.id);if(i){const s=i.getBoundingClientRect().top+window.scrollY-80;window.scrollTo({top:s,behavior:"smooth"})}}),c.appendChild(t),d.appendChild(c)})}document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll("pre").forEach(o=>{const e=document.createElement("button");e.innerHTML='<i class="bi bi-clipboard"></i>',e.className="copy-button",e.setAttribute("aria-label","Copia codice"),e.addEventListener("click",async()=>{const c=o.querySelector("code")?.innerText??o.innerText;try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(c);else{const t=document.createElement("textarea");t.value=c,t.style.cssText="position:fixed;opacity:0;pointer-events:none",document.body.appendChild(t),t.select(),document.execCommand("copy"),document.body.removeChild(t)}e.classList.add("copied"),e.setAttribute("aria-label","Copiato!"),setTimeout(()=>{e.classList.remove("copied"),e.setAttribute("aria-label","Copia codice")},2e3)}catch(t){console.error("Errore durante la copia:",t)}});const n=document.createElement("div");n.className="pre-wrapper",o.parentNode&&(o.parentNode.insertBefore(n,o),n.appendChild(o),n.appendChild(e))})});</script>  </main> <!-- ══ FOOTER ══════════════════════════════════════════════════════ --> <footer class="border-top border-secondary-subtle py-5 mt-5"> <div class="container"> <div class="row gy-4 pb-5"> <div class="col-lg-4"> <p class="fw-semibold text-uppercase small mb-3">Pablo Dev</p> <p class="text-secondary small lh-lg mb-4"> Sviluppo Software Web &amp; AI Integration <!-- Freelance Developer &amp; AI Specialist.<br>
+						Sviluppo Web App e integro l'AI nel tuo business. --> </p> <div class="d-flex gap-3"> <a href="https://github.com/pablodevhub" class="text-secondary"><i class="bi bi-github fs-6"></i></a> <a href="https://www.youtube.com/@pablodev-yt" class="text-secondary"><i class="bi bi-youtube fs-6"></i></a>  <a href="mailto:pablodev@outlook.it" class="text-secondary"><i class="bi bi-envelope fs-6"></i></a> </div> </div> <div class="col-6 col-lg-2 offset-lg-4"> <p class="text-uppercase fw-semibold mb-3 small">Navigazione</p> <div class="d-flex flex-column gap-2"> <a href="/" class="text-secondary text-decoration-none small">Home</a> <a href="/blog" class="text-secondary text-decoration-none small">Blog</a>
+						<a href="/progetti" class="text-secondary text-decoration-none small">Progetti</a>  </div> </div> <!-- <div class="col-6 col-lg-2">
+					<p class="text-uppercase fw-semibold mb-3 small">Servizi</p>
+					<div class="d-flex flex-column gap-2">
+					<a href="#" class="text-secondary text-decoration-none small">Siti Vetrina</a>
+					<a href="#" class="text-secondary text-decoration-none small">Web App</a>
+					<a href="#" class="text-secondary text-decoration-none small">Integrazione AI</a>
+					<a href="#" class="text-secondary text-decoration-none small">Consulenza</a>
+					</div>
+				</div> --> <div class="col-6 col-lg-2"> <p class="text-uppercase fw-semibold mb-3 small">Legale</p> <div class="d-flex flex-column gap-2"> <a href="/privacy-policy" class="text-secondary text-decoration-none small">Privacy Policy</a> <a href="/cookie-policy" class="text-secondary text-decoration-none small">Cookie Policy</a> </div> </div> </div> <div class="border-top border-secondary-subtle pt-4 d-flex justify-content-between align-items-center flex-wrap gap-2"> <span class="text-secondary small">&copy; 2026 Pablo. Tutti i diritti riservati.</span> <span class="text-secondary small">P.IVA 10407410967</span> </div> </div> </footer> <!-- <footer class="bg-body-tertiary border-top py-4 mt-5">
+		<div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-body-secondary small">
+		<span>&copy; {new Date().getFullYear()} {SITE_CONFIG.title}. Tutti i diritti riservati.</span>
+		<div class="d-flex gap-3">
+			<a href={`mailto:${SITE_CONFIG.email}`} class="text-body-secondary text-decoration-none">
+				<i class="bi bi-envelope-fill me-1"></i>{SITE_CONFIG.email}
+			</a>
+			<a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noopener noreferrer" class="text-body-secondary text-decoration-none">
+				<i class="bi bi-youtube me-1"></i>YouTube
+			</a>
+		</div>
+		</div>
+	</footer> --> <script src="/scripts/cookie-consent.js" defer></script> <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> --> <script type="module" src="/_astro/BaseLayout.astro_astro_type_script_index_0_lang.GtM1sxkV.js"></script> </body> </html>

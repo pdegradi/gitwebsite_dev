@@ -1,0 +1,630 @@
+<!DOCTYPE html><html lang="it" data-bs-theme="dark"> <head><!-- 
+		preconnect Ottimizza le connessioni esterne 
+		I file di Bootstrap vengono caricati da cdn.jsdelivr.net. Il browser perde tempo a "cercare" dove si trova questo server (DNS lookup) e a stabilire una connessione sicura.
+		Soluzione: Aggiungi queste due righe in cima al tuo <head>, prima di ogni altra cosa: 
+	--><link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v6.1.3"><title>Ambiente di sviluppo PHP con Podman su Windows 11 | Pablo Dev</title><meta name="description" content="Creare un ambiente di sviluppo con podman su windows 11. Questa procedura è anche compatibile con docker"><link rel="canonical" href="https://pablodev.pubcloud.net/blog/0004-ambiente-di-sviluppo-php-con-podman-su-windows-11/"><meta property="og:title" content="Ambiente di sviluppo PHP con Podman su Windows 11 | Pablo Dev"><meta property="og:description" content="Creare un ambiente di sviluppo con podman su windows 11. Questa procedura è anche compatibile con docker"><meta property="og:url" content="https://pablodev.pubcloud.net/blog/0004-ambiente-di-sviluppo-php-con-podman-su-windows-11/"><meta property="og:type" content="article"><meta property="og:site_name" content="Pablo Dev"><meta property="og:image" content="https://pablodev.pubcloud.net/images/blog/win11_podman.webp"><meta property="article:published_time" content="2026-01-04"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Ambiente di sviluppo PHP con Podman su Windows 11 | Pablo Dev"><meta name="twitter:description" content="Creare un ambiente di sviluppo con podman su windows 11. Questa procedura è anche compatibile con docker"><meta name="twitter:image" content="https://pablodev.pubcloud.net/images/blog/win11_podman.webp"><link rel="sitemap" href="/sitemap-index.xml"><link rel="icon" href="data:,"><!-- blank favicon --><!-- Bootstrap Icons --><link rel="stylesheet" href="/vendors/bootstrap-icons-1.13.1/bootstrap-icons.min.css"><!-- stili nel file main.scss importati come ultimi --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","name":"Pablo Dev","url":"https://pablodev.pubcloud.net","description":"Sviluppo Software Web & AI Integration","datePublished":"2026-01-04","author":{"@type":"Person","name":"Pablo"}}</script><link rel="stylesheet" href="/_astro/BaseLayout.CFw3ldGN.css"></head> <body> <nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary border-bottom"> <div class="container"> <a class="navbar-brand fw-bold" href="/">Pablo Dev</a> <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button> <div class="collapse navbar-collapse" id="navbarNav"> <ul class="navbar-nav ms-auto gap-2"> <li class="nav-item"> <a class="nav-link" href="/">Home</a> </li> <li class="nav-item"><a class="nav-link" href="/blog">Blog</a></li>
+						<li class="nav-item"><a class="nav-link" href="/progetti">Progetti</a></li>
+						<li class="nav-item"> <a class="nav-link" href="https://www.youtube.com/@pablodev-yt" target="_blank" rel="noopener noreferrer"> <i class="bi bi-youtube me-1"></i>YouTube
+</a> </li>  </ul> </div> </div> </nav> <main>  <article class="container py-5"> <div class="mb-4"> <a href="/blog" class="btn btn-outline-secondary btn-sm"> <i class="bi bi-arrow-left me-1"></i>Tutti gli articoli
+</a> </div> <h1 class="mb-2 text-center">Ambiente di sviluppo PHP con Podman su Windows 11</h1> <p class="text-body-secondary mb-4 text-center"> <i class="bi bi-calendar3 me-1"></i> <time datetime="2026-01-04">4 gennaio 2026</time> </p> <div class="row justify-content-center"> <div class="col-lg-8"> <img src="/images/blog/win11_podman.webp" alt="Windows 11 podman" class="article-cover rounded mb-4"> <nav id="toc-container" class="card bg-body-tertiary border mt-4 mb-5 p-3" aria-label="Indice dei contenuti"> <h2 class="h4 text-uppercase text-body-secondary mb-3"> <i class="bi bi-list-ul me-1"></i> Indice
+</h2> <ul class="toc-list" id="toc-list"></ul> </nav> <div id="article-content"> <h2 id="1-prerequisiti-e-installazione-podman">1. Prerequisiti e installazione Podman</h2>
+<h3 id="installare-podman-su-windows-11">Installare Podman su Windows 11</h3>
+<p>Scarica e installa Podman per Windows dall’indirizzo ufficiale:</p>
+<pre><code>https://podman.io/
+</code></pre>
+<p>Scarica il file <code>.exe</code> dell’ultima versione stabile (es. <code>podman-v5.x.x-setup.exe</code>) ed eseguilo.</p>
+<h3 id="inizializzare-la-podman-machine">Inizializzare la Podman Machine</h3>
+<p>Podman su Windows utilizza una macchina virtuale Linux in background. Inizializzala con risorse adeguate allo sviluppo:</p>
+<pre><code>podman machine init --memory 4096
+</code></pre>
+<p>Viene creata una macchina virtuale con nome <code>podman-machine-default</code>. Volendo posso anche dare un nome alla macchina usando il comando <code>podman machine init nome-macchina</code></p>
+<p>Per avviare e fermare la macchina usa questi comandi</p>
+<pre><code>podman machine start
+podman machine stop
+</code></pre>
+<p>I container possono girare in due modalità</p>
+<ol>
+<li>Rootless: I container girano senza privilegi di root</li>
+<li>Rootful: I container girano come root dentro la VM</li>
+</ol>
+<p>Se voglio far girare la macchine con privilegi di root lanciare il seguente comando e poi fermare e riavviare la macchina</p>
+<pre><code>podman machine set --rootful
+podman machine stop
+podman machine start
+</code></pre>
+<p>Per vedere la macchina virtuale installata</p>
+<pre><code>podman machine list
+</code></pre>
+<p>Nel caso in cui desideri cancellare e ricreare la macchina usa</p>
+<pre><code>podman machine rm
+</code></pre>
+<p>Verifica che tutto funzioni:</p>
+<pre><code>podman version
+podman info
+</code></pre>
+<p>Per vedere la macchina installa con wsl lanciare il seguente comando</p>
+<pre><code>wsl -l -v
+</code></pre>
+<h3 id="installare-podman-compose">Installare podman-compose</h3>
+<p><code>podman-compose</code> permette di orchestrare più container tramite un file <code>compose.yaml</code>, ed è l’equivalente di <code>docker-compose</code> per Podman.</p>
+<pre><code>pip install podman-compose
+</code></pre>
+<p>Se non hai Python installato, scaricalo da <code>https://python.org</code> e assicurati di aggiungere Python al PATH durante l’installazione.</p>
+<h2 id="2-struttura-del-progetto">2. Struttura del progetto</h2>
+<p>Crea questa struttura di cartelle. La cartella <code>D:\temp\wamp-podman</code> contiene tutta la configurazione dei container. I tuoi siti web risiedono nella sottocartella <code>www</code> e vengono montati nel container senza essere copiati al suo interno.</p>
+<pre><code>D:\temp\wamp-podman\
+│
+├── .env                          ← tutte le variabili configurabili qui
+├── compose.yaml                  ← orchestrazione dei container
+│
+├── php-apache\
+│   ├── Dockerfile                ← immagine custom PHP 8.5.4-fpm + Apache
+│   ├── apache\
+│   │   ├── vhosts.conf           ← configurazione virtual host Apache
+│   │   └── start.sh              ← script di avvio PHP-FPM + Apache
+│   └── php\
+│       ├── custom.ini            ← impostazioni PHP aggiuntive
+│       └── fpm-pool.conf         ← configurazione pool PHP-FPM
+│
+└── www\                          ← i tuoi siti (solo montata nel container)
+    ├── sito1\
+    ├── sito2\
+    └── ...
+</code></pre>
+<h2 id="3-file-di-configurazione-centrale-env">3. File di configurazione centrale .env</h2>
+<p>Questo è il punto unico dove modificare tutte le variabili dell’ambiente. Non dovrai mai toccare altri file per cambiare porte, credenziali o percorsi.</p>
+<p>Percorso: <code>D:\temp\wamp-podman\.env</code></p>
+<pre><code># ─────────────────────────────────────────────
+#  PERCORSI
+# ─────────────────────────────────────────────
+
+# Percorso della cartella che contiene i tuoi siti web.
+# Usa la sintassi con slash (/).
+SITES_ROOT=D:/temp/wamp-podman/www
+
+# ─────────────────────────────────────────────
+#  PORTE HOST
+# ─────────────────────────────────────────────
+
+# Porta su cui Apache risponde su Windows (http://localhost:APACHE_PORT)
+APACHE_PORT=8080
+
+# Porta interna del container su cui Apache ascolta
+# Per wordpress tenere allineato questo valore con APACHE_PORT
+APACHE_INTERNAL_PORT=8080
+
+# Porta su cui phpMyAdmin è raggiungibile da Windows
+PHPMYADMIN_PORT=8081
+
+# Porta interna del container su cui phpMyAdmin ascolta
+PHPMYADMIN_INTERNAL_PORT=80
+
+# Porta per MariaDB (utile per client esterni come DBeaver)
+MARIADB_PORT=3306
+
+# ─────────────────────────────────────────────
+#  MARIADB
+# ─────────────────────────────────────────────
+
+MARIADB_ROOT_PASSWORD=root
+
+# ─────────────────────────────────────────────
+#  NOMI CONTAINER
+# ─────────────────────────────────────────────
+
+# prefisso usato da Podman per nominare tutte le risorse
+COMPOSE_PROJECT_NAME=devenv
+</code></pre>
+<h2 id="4-dockerfile-per-php-fpm--apache">4. Dockerfile per PHP-FPM + Apache</h2>
+<p>Questo Dockerfile usa come base <code>php:8.5.4-fpm</code>, che include PHP-FPM ma non un web server. Apache viene installato tramite <code>apt-get</code> e configurato per comunicare con PHP-FPM tramite <strong>FastCGI</strong> usando il modulo <code>mod_proxy_fcgi</code>. PHP-FPM ascolta su socket Unix per prestazioni migliori rispetto a TCP.</p>
+<p>Percorso: <code>D:\temp\wamp-podman\php-apache\Dockerfile</code></p>
+<pre><code># Immagine base ufficiale PHP 8.5.4 con PHP-FPM preinstallato.
+# Non include un web server: Apache viene installato separatamente qui sotto.
+FROM php:8.5.4-fpm
+
+# Aggiorna l'indice dei pacchetti apt prima di qualsiasi installazione.
+RUN apt-get update
+
+# Installa Apache e il modulo FastCGI.
+# apache2 è il web server che riceve le richieste HTTP.
+# libapache2-mod-fcgid è necessario per la comunicazione FastCGI tra Apache e PHP-FPM,
+# anche se il modulo che usiamo effettivamente è mod_proxy_fcgi (abilitato più avanti).
+RUN apt-get install -y apache2 libapache2-mod-fcgid
+
+# Installa le librerie di sistema necessarie per compilare le estensioni PHP.
+# Queste sono le dipendenze native (headers e librerie C) richieste da:
+# - libzip-dev, libpng-dev, libjpeg62-turbo-dev, libwebp-dev, libfreetype6-dev → GD (immagini)
+# - libonig-dev → mbstring (stringhe multibyte)
+# - libxml2-dev → soap, xsl, xml
+# - libcurl4-openssl-dev, libssl-dev → curl e connessioni sicure
+# - libmagickwand-dev → ImageMagick
+# - libicu-dev → intl (internazionalizzazione)
+# - libxslt1-dev → xsl (trasformazioni XSLT)
+# - libsqlite3-dev → pdo_sqlite
+# - unzip, curl, git, nano → strumenti generali utili dentro il container
+RUN apt-get install -y libzip-dev libpng-dev libjpeg62-turbo-dev libwebp-dev libfreetype6-dev libonig-dev libxml2-dev libcurl4-openssl-dev libssl-dev libmagickwand-dev libicu-dev libxslt1-dev libsqlite3-dev unzip curl git nano
+
+# GD richiede un configure separato per specificare quali formati immagine supportare.
+# configure e install devono stare nello stesso RUN per mantenere lo stato della configurazione.
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp &#x26;&#x26; docker-php-ext-install gd
+
+# Estensioni matematiche e di utilità generale.
+# bcmath → calcoli decimali ad alta precisione (richiesto da Laravel e molti pacchetti)
+# calendar → conversioni tra formati di calendario
+# exif → lettura metadati da immagini (richiesto da WordPress per la gestione media)
+# gettext → internazionalizzazione tramite file .po/.mo
+RUN docker-php-ext-install bcmath calendar exif gettext
+
+# Estensioni per stringhe e database MySQL.
+# intl → internazionalizzazione avanzata (richiesto da Laravel)
+# mbstring → gestione stringhe multibyte (UTF-8), richiesto praticamente da tutto
+# mysqli → interfaccia procedurale per MySQL/MariaDB (richiesto da WordPress)
+RUN docker-php-ext-install intl mbstring mysqli
+
+# Estensioni per processi e database.
+# pcntl → controllo processi (richiesto da Laravel queue e Artisan)
+# pdo → interfaccia PDO generica per database
+# pdo_mysql → driver PDO per MySQL/MariaDB (richiesto da Laravel)
+# pdo_sqlite → driver PDO per SQLite (utile per test)
+RUN docker-php-ext-install pcntl pdo pdo_mysql pdo_sqlite
+
+# Estensioni per protocolli e formati.
+# soap → protocollo SOAP per web service
+# sockets → comunicazione tramite socket di basso livello
+# xsl → trasformazioni XSLT su documenti XML
+# zip → creazione e lettura di archivi ZIP (richiesto da Composer e molti pacchetti)
+RUN docker-php-ext-install soap sockets xsl zip
+
+# ImageMagick: libreria avanzata per manipolazione immagini.
+# Installata tramite PECL perché non fa parte delle estensioni core di PHP.
+# Offre funzionalità superiori a GD (resize, watermark, conversioni, PDF, ecc.)
+RUN pecl install imagick
+RUN docker-php-ext-enable imagick
+
+# Redis: estensione per comunicare con un server Redis.
+# Utile per cache, sessioni e code in Laravel e WordPress.
+# Installata tramite PECL perché non fa parte delle estensioni core di PHP.
+RUN pecl install redis
+RUN docker-php-ext-enable redis
+
+# Copia il binario di Composer dall'immagine ufficiale.
+# Composer è il gestore di dipendenze PHP, necessario per Laravel e molti progetti moderni.
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Abilita i moduli Apache necessari.
+# proxy_fcgi → permette ad Apache di passare le richieste PHP a PHP-FPM via FastCGI
+# setenvif → richiesto da proxy_fcgi per impostare variabili d'ambiente sulle richieste
+# rewrite → riscrittura URL, richiesto da Laravel (.htaccess) e WordPress
+# headers → gestione degli header HTTP
+# expires → header per la cache del browser
+# deflate → compressione gzip delle risposte
+# ssl → supporto HTTPS
+# vhost_alias → abilita VirtualDocumentRoot per i virtual host wildcard
+RUN a2enmod proxy_fcgi setenvif rewrite headers expires deflate ssl vhost_alias
+
+# Copia la configurazione dei virtual host Apache,
+# sovrascrivendo il virtual host di default dell'immagine base.
+COPY apache/vhosts.conf /etc/apache2/sites-available/000-default.conf
+
+# Copia le configurazioni PHP personalizzate nella cartella conf.d,
+# che viene letta da PHP all'avvio per sovrascrivere i valori di php.ini.
+COPY php/custom.ini /usr/local/etc/php/conf.d/custom.ini
+
+# Sovrascrive la configurazione del pool PHP-FPM di default
+# per usare un socket Unix invece di TCP.
+COPY php/fpm-pool.conf /usr/local/etc/php-fpm.d/www.conf
+
+# Copia lo script di avvio che lancia sia PHP-FPM che Apache,
+# e lo rende eseguibile.
+COPY apache/start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+# Allinea l'UID e GID dell'utente www-data a 1000.
+# Su Windows/Linux l'utente proprietario dei file montati ha tipicamente UID 1000.
+# Questo evita problemi di permessi quando Apache o PHP-FPM
+# devono leggere, scrivere o creare file nella cartella montata.
+RUN usermod -u 1000 www-data
+RUN groupmod -g 1000 www-data
+
+# Imposta la cartella di lavoro predefinita del container.
+WORKDIR /var/www/html
+
+# Documenta che il container espone la porta 80.
+# Questo valore viene sovrascritto dinamicamente dallo script start.sh
+# in base alla variabile APACHE_INTERNAL_PORT passata dal compose.yaml.
+EXPOSE 80
+
+# Sostituisce il CMD predefinito dell'immagine base (php-fpm)
+# con il nostro script che avvia sia PHP-FPM che Apache.
+CMD ["/usr/local/bin/start.sh"]
+</code></pre>
+<h3 id="script-di-avvio">Script di avvio</h3>
+<p>Poiché il container deve eseguire sia PHP-FPM che Apache, serve uno script che li avvii entrambi. L’immagine base <code>php:8.5.4-fpm</code> ha come CMD predefinito solo <code>php-fpm</code>: lo script lo sostituisce avviando entrambi i processi.</p>
+<p>Percorso: <code>D:\temp\wamp-podman\php-apache\apache\start.sh</code></p>
+<pre><code>#!/bin/bash
+export APACHE_LOG_DIR=/var/log/apache2
+export APACHE_RUN_DIR=/var/run/apache2
+export APACHE_RUN_USER=www-data
+export APACHE_RUN_GROUP=www-data
+export APACHE_LOCK_DIR=/var/lock/apache2
+export APACHE_PID_FILE=/var/run/apache2/apache2.pid
+
+# Porta dinamica da variabile d'ambiente, default 80 se non impostata
+APACHE_INTERNAL_PORT=${APACHE_INTERNAL_PORT:-80}
+
+# Imposta la porta di ascolto
+echo "Listen ${APACHE_INTERNAL_PORT}" > /etc/apache2/ports.conf
+
+# Sostituisce la porta nei VirtualHost
+sed -i "s/\*:APACHE_PORT/\*:${APACHE_INTERNAL_PORT}/g" /etc/apache2/sites-available/000-default.conf
+
+# crea la cartella dove PHP-FPM scriverà il socket Unix. Il flag -p evita errori se la cartella esiste già
+mkdir -p /var/run/php
+
+# assegna la cartella all'utente www-data, che è l'utente con cui girano sia Apache che PHP-FPM
+chown www-data:www-data /var/run/php
+
+#  avvia PHP-FPM in background
+php-fpm &#x26;
+
+# avvia Apache in primo piano. Questo è l'ultimo comando e non ritorna mai finché il container è in esecuzione. 
+# Docker e Podman richiedono che almeno un processo giri in foreground per mantenere il container attivo: 
+# se questo processo termina, il container si spegne.
+apache2ctl -D FOREGROUND
+</code></pre>
+<h2 id="5-configurazione-apache">5. Configurazione Apache</h2>
+<p>Apache riceve le richieste HTTP e passa quelle PHP a PHP-FPM tramite FastCGI usando la direttiva <code>SetHandler proxy:unix</code>. Il socket Unix <code>/var/run/php/php-fpm.sock</code> è il canale di comunicazione tra Apache e PHP-FPM all’interno del container.</p>
+<p>Percorso: <code>D:\temp\wamp-podman\php-apache\apache\vhosts.conf</code></p>
+<pre><code># ─── Virtual Host di default ─────────
+&#x3C;VirtualHost *:APACHE_PORT>
+    ServerName localhost
+    DocumentRoot /var/www/html
+
+    &#x3C;Directory /var/www/html>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    &#x3C;/Directory>
+
+    &#x3C;FilesMatch "\.php$">
+        SetHandler "proxy:unix:/var/run/php/php-fpm.sock|fcgi://localhost"
+    &#x3C;/FilesMatch>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+&#x3C;/VirtualHost>
+
+# ─── Virtual Host dedicato per progetti Laravel ──────────
+# La DocumentRoot punta alla sottocartella /public.
+# Duplica questo blocco per ogni progetto Laravel aggiuntivo.
+# Ricorda di aggiungere il dominio al file hosts di Windows:
+#   C:\Windows\System32\drivers\etc\hosts
+#   127.0.0.1   sito1.localhost
+
+&#x3C;VirtualHost *:APACHE_PORT>
+    ServerName sito1.localhost
+    DocumentRoot /var/www/html/sito1/public
+
+    &#x3C;Directory /var/www/html/sito1/public>
+        AllowOverride All
+        Require all granted
+    &#x3C;/Directory>
+
+    &#x3C;FilesMatch "\.php$">
+        SetHandler "proxy:unix:/var/run/php/php-fpm.sock|fcgi://localhost"
+    &#x3C;/FilesMatch>
+&#x3C;/VirtualHost>
+
+# ─── Virtual Host wildcard per WordPress e siti senza /public ────────────────
+# Gestisce automaticamente tutti i siti la cui DocumentRoot
+# è la cartella radice del progetto, senza aggiungere un VirtualHost per ognuno.
+
+&#x3C;VirtualHost *:APACHE_PORT>
+    ServerName wildcard.localhost
+    ServerAlias *.localhost
+    UseCanonicalName Off
+    VirtualDocumentRoot /var/www/html/%1
+
+    &#x3C;Directory /var/www/html>
+        AllowOverride All
+        Require all granted
+    &#x3C;/Directory>
+
+    &#x3C;FilesMatch "\.php$">
+        SetHandler "proxy:unix:/var/run/php/php-fpm.sock|fcgi://localhost"
+    &#x3C;/FilesMatch>
+&#x3C;/VirtualHost>
+</code></pre>
+<h3 id="configurazione-pool-php-fpm">Configurazione pool PHP-FPM</h3>
+<p>Sovrascrivi la configurazione di default del pool PHP-FPM per usare un socket Unix invece di TCP, che è più performante per comunicazioni locali all’interno del container.</p>
+<p>Percorso: <code>D:\temp\wamp-podman\php-apache\php\fpm-pool.conf</code></p>
+<pre><code>[www]
+; Utente e gruppo con cui girano i processi PHP-FPM.
+; Deve corrispondere all'utente di Apache per evitare problemi di permessi
+; sui file montati dalla cartella Windows.
+user = www-data
+group = www-data
+
+; Usa un socket Unix invece di TCP (es. 127.0.0.1:9000).
+; Il socket Unix è più performante per comunicazioni locali all'interno
+; dello stesso container, poiché evita il overhead del protocollo TCP.
+listen = /var/run/php/php-fpm.sock
+
+; Permessi sul socket: owner e group devono corrispondere all'utente Apache
+; in modo che Apache possa scrivere sul socket e passare le richieste a PHP-FPM.
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0660
+
+; Gestione dinamica dei processi worker.
+; PHP-FPM crea e distrugge i worker in base al carico,
+; mantenendosi tra un minimo e un massimo definiti qui sotto.
+pm = dynamic
+
+; Numero massimo di processi worker simultanei.
+; Ogni worker gestisce una richiesta PHP alla volta.
+pm.max_children = 20
+
+; Numero di worker avviati insieme al container.
+pm.start_servers = 4
+
+; Numero minimo di worker inattivi mantenuti in standby.
+; Se scende sotto questo valore PHP-FPM ne crea di nuovi.
+pm.min_spare_servers = 2
+
+; Numero massimo di worker inattivi tollerati.
+; Se supera questo valore PHP-FPM ne termina alcuni per liberare memoria.
+pm.max_spare_servers = 6
+</code></pre>
+<h2 id="6-configurazione-php">6. Configurazione PHP</h2>
+<p>Andiamo ora a sovrascrivere alcune direttive di php con un file ini custom</p>
+<p>Percorso: <code>D:\temp\wamp-podman\php-apache\php\custom.ini</code></p>
+<pre><code>; ─── Impostazioni generali ───────
+display_errors = On
+display_startup_errors = On
+error_reporting = E_ALL
+log_errors = On
+
+; ─── Limiti di risorse ──────────
+memory_limit = 512M
+max_execution_time = 120
+max_input_time = 120
+max_input_vars = 3000
+
+; ─── Upload ───────
+upload_max_filesize = 64M
+post_max_size = 64M
+
+; ─── Timezone ────────
+date.timezone = Europe/Rome
+
+; ─── OPcache ──────
+opcache.enable = 0
+opcache.memory_consumption = 128
+opcache.max_accelerated_files = 10000
+; 0 = nessuna cache del timestamp: Apache vede sempre i file aggiornati
+opcache.revalidate_freq = 0
+
+; ─── Sessioni ──────
+session.gc_maxlifetime = 3600
+</code></pre>
+<h2 id="8-file-composeyaml">8. File compose.yaml</h2>
+<p>Un file <code>compose.yaml</code> serve a definire e avviare più container (servizi) insieme con una sola configurazione, descrivendo come devono funzionare e interagire tra loro</p>
+<p>Percorso: <code>D:\temp\wamp-podman\compose.yaml</code></p>
+<pre><code># Nome del progetto, usato come prefisso per container, volumi e reti.
+# Il valore viene letto dal file .env.
+name: ${COMPOSE_PROJECT_NAME}
+
+# Definizione della rete interna condivisa tra tutti i container.
+# Con il driver bridge i container sulla stessa rete si raggiungono
+# tramite il loro nome servizio (es. "mariadb", "php-apache"),
+# ma sono isolati dal resto della rete della macchina host.
+networks:
+  devnet:
+    driver: bridge
+
+# Dichiarazione dei volumi persistenti gestiti da Podman.
+# Un volume è una cartella gestita direttamente da Podman, separata
+# dal filesystem del container. I dati sopravvivono al riavvio e
+# alla rimozione del container, e vengono eliminati solo con
+# "podman volume rm" oppure "podman-compose down -v".
+volumes:
+  mariadb_data:
+    driver: local
+
+services:
+
+  php-apache:
+    # Costruisce l'immagine dal Dockerfile invece di scaricarla da un registry.
+    # context indica la cartella che viene inviata al build engine come contesto,
+    # ovvero la cartella da cui il Dockerfile legge i file con le istruzioni COPY.
+    build:
+      context: ./php-apache
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}_php
+    # Riavvia il container automaticamente se si blocca o se la macchina viene riavviata.
+    # "unless-stopped" significa che si riavvia sempre tranne quando lo si ferma manualmente.
+    restart: unless-stopped
+    # Mappa la porta esterna (Windows) sulla porta interna (container).
+    # Formato: "porta_host:porta_container"
+    # Entrambi i valori vengono letti dal file .env per essere configurabili in un solo punto.
+    ports:
+      - "${APACHE_PORT}:${APACHE_INTERNAL_PORT}"
+    volumes:
+      # Questo è un bind mount: monta una cartella esistente sul filesystem host
+      # direttamente dentro il container. I file non vengono copiati: il container
+      # accede in tempo reale agli stessi file presenti in ./www su Windows.
+      # Qualsiasi modifica fatta dal container (lettura, scrittura, creazione, cancellazione)
+      # si riflette immediatamente sulla cartella Windows e viceversa.
+      # Il flag ":z" è necessario su sistemi con SELinux abilitato per assegnare
+      # la label di sicurezza corretta al mount.
+      - "./www:/var/www/html:z"
+    environment:
+      # Passa la porta interna di Apache allo script start.sh che la usa
+      # per configurare dinamicamente Apache al momento dell'avvio del container.
+      - APACHE_INTERNAL_PORT=${APACHE_INTERNAL_PORT}
+    networks:
+      - devnet
+    # Garantisce che MariaDB sia avviato prima di PHP-Apache.
+    # Utile per evitare errori di connessione al database durante l'avvio.
+    depends_on:
+      - mariadb
+
+  mariadb:
+    # Scarica l'immagine ufficiale MariaDB 12.2 dal registry Docker Hub.
+    image: mariadb:12.2
+    container_name: ${COMPOSE_PROJECT_NAME}_db
+    restart: unless-stopped
+    ports:
+      - "${MARIADB_PORT}:3306"
+    volumes:
+      # Questo è un volume mount: diversamente dal bind mount sopra,
+      # qui non si monta una cartella Windows ma un volume gestito da Podman.
+      # "mariadb_data" è il volume dichiarato nella sezione "volumes" in cima al file.
+      # I dati del database vengono salvati qui dentro e non nella cartella Windows,
+      # per due motivi: le prestazioni del filesystem Windows su mount sono inferiori
+      # rispetto a un volume nativo, e MariaDB richiede un filesystem Linux nativo
+      # per funzionare correttamente.
+      - mariadb_data:/var/lib/mysql:z
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+    networks:
+      - devnet
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ${COMPOSE_PROJECT_NAME}_pma
+    restart: unless-stopped
+    ports:
+      - "${PHPMYADMIN_PORT}:${PHPMYADMIN_INTERNAL_PORT}"
+    environment:
+      # Nome del container MariaDB a cui phpMyAdmin si connette.
+      # Podman risolve "mariadb" all'indirizzo IP corretto grazie alla rete devnet.
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+      # Dimensione massima dei file SQL importabili tramite interfaccia web.
+      UPLOAD_LIMIT: 64M
+    networks:
+      - devnet
+    depends_on:
+      - mariadb
+</code></pre>
+<h2 id="9-avvio-e-gestione-dellambiente">9. Avvio e gestione dell’ambiente</h2>
+<p>Apri PowerShell nella cartella <code>D:\temp\wamp-podman</code>.</p>
+<h3 id="prima-build">Prima build</h3>
+<p>Da eseguire solo la prima volta, o dopo modifiche al Dockerfile:</p>
+<pre><code>cd D:\temp\wamp-podman
+podman-compose build
+</code></pre>
+<p>Nel caso in cui si verificono problemi, a container avviati, per ricostruire tutto</p>
+<pre><code># ferma e rimuove i container in esecuzione. I dati nel volume MariaDB restano intatti.
+podman-compose down
+
+# ricostruisce le immagini leggendo il Dockerfile da zero, ignorando qualsiasi layer memorizzato nella cache. 
+# Necessario quando modifichi il Dockerfile o i file che copia
+podman-compose build --no-cache
+
+# crea e avvia i container basandosi sulle immagini appena costruite
+podman-compose up -d
+</code></pre>
+<h3 id="avviare-fermare-e-verificare-i-container">Avviare, fermare e verificare i container</h3>
+<pre><code># Avvia tutti i container in background
+podman-compose up -d
+
+# Verifica che i container siano in esecuzione
+podman ps
+
+# Ferma i container senza rimuoverli
+podman-compose stop
+
+# Ferma e rimuove i container (i dati del DB rimangono nel volume)
+podman-compose down
+</code></pre>
+<h3 id="accedere-ai-servizi">Accedere ai servizi</h3>
+<pre><code>Siti web       →  http://localhost:8080
+Sito specifico →  http://sito1.localhost:8080
+phpMyAdmin     →  http://localhost:8081
+</code></pre>
+<h3 id="log-e-shell">Log e shell</h3>
+<pre><code># Log in tempo reale di tutti i container
+podman-compose logs -f
+
+# Log di un singolo container
+podman logs -f devenv_php
+
+# Aprire una shell nel container PHP
+podman exec -it devenv_php bash
+</code></pre>
+<p>All’interno del container puoi eseguire comandi Composer e Artisan direttamente nell’ambiente PHP:</p>
+<pre><code>composer install
+php artisan migrate
+php -m
+</code></pre>
+<h2 id="10-uso-quotidiano">10. Uso quotidiano</h2>
+<h3 id="avviostop-rapido">Avvio/Stop rapido</h3>
+<pre><code>podman machine start
+cd D:\temp\wamp-podman
+podman-compose up -d
+podman-compose stop
+</code></pre>
+<h3 id="modificare-una-variabile">Modificare una variabile</h3>
+<p>Apri <code>D:\temp\wamp-podman\.env</code>, modifica il valore desiderato, poi riavvia i container:</p>
+<pre><code>podman-compose down
+podman-compose up -d
+</code></pre>
+<h3 id="aggiungere-un-nuovo-sito">Aggiungere un nuovo sito</h3>
+<p>Crea la cartella del sito in <code>D:\temp\wamp-podman\www\nuovo-sito\</code>, poi aggiungi una riga al file hosts di Windows (come amministratore):</p>
+<pre><code>127.0.0.1   nuovo-sito.localhost
+</code></pre>
+<p>Il file hosts si trova in <code>C:\Windows\System32\drivers\etc\hosts</code>.</p>
+<p>Se il sito usa Laravel, aggiungi un <code>VirtualHost</code> dedicato in <code>vhosts.conf</code> con <code>DocumentRoot</code> che punta a <code>/var/www/html/nuovo-sito/public</code>, poi ricostruisci:</p>
+<pre><code>podman-compose down
+podman-compose build
+podman-compose up -d
+</code></pre>
+<p>Se il sito è WordPress o ha la DocumentRoot nella root del progetto, il virtual host wildcard lo gestisce automaticamente senza modifiche.</p>
+<h3 id="gestire-i-database">Gestire i database</h3>
+<pre><code># Via browser
+http://localhost:8081
+
+# Via CLI nel container
+podman exec -it devenv_db mariadb -u root -p
+</code></pre>
+<h3 id="backup-e-ripristino-del-database">Backup e ripristino del database</h3>
+<pre><code># Esporta tutti i database
+podman exec devenv_db mariadb-dump -u root -prootpassword --all-databases > backup.sql
+
+# Ripristino
+podman exec -i devenv_db mariadb -u root -prootpassword &#x3C; backup.sql
+</code></pre>
+<h3 id="controllare-i-moduli-php-attivi">Controllare i moduli PHP attivi</h3>
+<pre><code>podman exec devenv_php php -m
+</code></pre>
+<h3 id="avviare-podman-machine-automaticamente-con-windows">Avviare Podman machine automaticamente con Windows</h3>
+<p>Per evitare di eseguire manualmente <code>podman machine start</code> ogni giorno, crea un Task nel Task Scheduler di Windows con questi parametri:</p>
+<pre><code>Trigger:   All'avvio di Windows
+Programma: podman
+Argomenti: machine start
+</code></pre> </div> </div> </div> </article> <script type="module">const a=document.getElementById("article-content"),d=document.getElementById("toc-list"),r=document.getElementById("toc-container");if(a&&d&&r){const o=a.querySelectorAll("h2");o.length===0?r.style.display="none":o.forEach((e,n)=>{e.id||(e.id=`section-${n+1}`);const c=document.createElement("li"),t=document.createElement("a");t.href=`#${e.id}`,t.textContent=e.textContent??"",t.className="text-body-secondary",t.addEventListener("click",l=>{l.preventDefault();const i=document.getElementById(e.id);if(i){const s=i.getBoundingClientRect().top+window.scrollY-80;window.scrollTo({top:s,behavior:"smooth"})}}),c.appendChild(t),d.appendChild(c)})}document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll("pre").forEach(o=>{const e=document.createElement("button");e.innerHTML='<i class="bi bi-clipboard"></i>',e.className="copy-button",e.setAttribute("aria-label","Copia codice"),e.addEventListener("click",async()=>{const c=o.querySelector("code")?.innerText??o.innerText;try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(c);else{const t=document.createElement("textarea");t.value=c,t.style.cssText="position:fixed;opacity:0;pointer-events:none",document.body.appendChild(t),t.select(),document.execCommand("copy"),document.body.removeChild(t)}e.classList.add("copied"),e.setAttribute("aria-label","Copiato!"),setTimeout(()=>{e.classList.remove("copied"),e.setAttribute("aria-label","Copia codice")},2e3)}catch(t){console.error("Errore durante la copia:",t)}});const n=document.createElement("div");n.className="pre-wrapper",o.parentNode&&(o.parentNode.insertBefore(n,o),n.appendChild(o),n.appendChild(e))})});</script>  </main> <!-- ══ FOOTER ══════════════════════════════════════════════════════ --> <footer class="border-top border-secondary-subtle py-5 mt-5"> <div class="container"> <div class="row gy-4 pb-5"> <div class="col-lg-4"> <p class="fw-semibold text-uppercase small mb-3">Pablo Dev</p> <p class="text-secondary small lh-lg mb-4"> Sviluppo Software Web &amp; AI Integration <!-- Freelance Developer &amp; AI Specialist.<br>
+						Sviluppo Web App e integro l'AI nel tuo business. --> </p> <div class="d-flex gap-3"> <a href="https://github.com/pablodevhub" class="text-secondary"><i class="bi bi-github fs-6"></i></a> <a href="https://www.youtube.com/@pablodev-yt" class="text-secondary"><i class="bi bi-youtube fs-6"></i></a>  <a href="mailto:pablodev@outlook.it" class="text-secondary"><i class="bi bi-envelope fs-6"></i></a> </div> </div> <div class="col-6 col-lg-2 offset-lg-4"> <p class="text-uppercase fw-semibold mb-3 small">Navigazione</p> <div class="d-flex flex-column gap-2"> <a href="/" class="text-secondary text-decoration-none small">Home</a> <a href="/blog" class="text-secondary text-decoration-none small">Blog</a>
+						<a href="/progetti" class="text-secondary text-decoration-none small">Progetti</a>  </div> </div> <!-- <div class="col-6 col-lg-2">
+					<p class="text-uppercase fw-semibold mb-3 small">Servizi</p>
+					<div class="d-flex flex-column gap-2">
+					<a href="#" class="text-secondary text-decoration-none small">Siti Vetrina</a>
+					<a href="#" class="text-secondary text-decoration-none small">Web App</a>
+					<a href="#" class="text-secondary text-decoration-none small">Integrazione AI</a>
+					<a href="#" class="text-secondary text-decoration-none small">Consulenza</a>
+					</div>
+				</div> --> <div class="col-6 col-lg-2"> <p class="text-uppercase fw-semibold mb-3 small">Legale</p> <div class="d-flex flex-column gap-2"> <a href="/privacy-policy" class="text-secondary text-decoration-none small">Privacy Policy</a> <a href="/cookie-policy" class="text-secondary text-decoration-none small">Cookie Policy</a> </div> </div> </div> <div class="border-top border-secondary-subtle pt-4 d-flex justify-content-between align-items-center flex-wrap gap-2"> <span class="text-secondary small">&copy; 2026 Pablo. Tutti i diritti riservati.</span> <span class="text-secondary small">P.IVA 10407410967</span> </div> </div> </footer> <!-- <footer class="bg-body-tertiary border-top py-4 mt-5">
+		<div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-body-secondary small">
+		<span>&copy; {new Date().getFullYear()} {SITE_CONFIG.title}. Tutti i diritti riservati.</span>
+		<div class="d-flex gap-3">
+			<a href={`mailto:${SITE_CONFIG.email}`} class="text-body-secondary text-decoration-none">
+				<i class="bi bi-envelope-fill me-1"></i>{SITE_CONFIG.email}
+			</a>
+			<a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noopener noreferrer" class="text-body-secondary text-decoration-none">
+				<i class="bi bi-youtube me-1"></i>YouTube
+			</a>
+		</div>
+		</div>
+	</footer> --> <script src="/scripts/cookie-consent.js" defer></script> <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> --> <script type="module" src="/_astro/BaseLayout.astro_astro_type_script_index_0_lang.GtM1sxkV.js"></script> </body> </html>

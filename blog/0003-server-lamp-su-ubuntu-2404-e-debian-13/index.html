@@ -1,0 +1,907 @@
+<!DOCTYPE html><html lang="it" data-bs-theme="dark"> <head><!-- 
+		preconnect Ottimizza le connessioni esterne 
+		I file di Bootstrap vengono caricati da cdn.jsdelivr.net. Il browser perde tempo a "cercare" dove si trova questo server (DNS lookup) e a stabilire una connessione sicura.
+		Soluzione: Aggiungi queste due righe in cima al tuo <head>, prima di ogni altra cosa: 
+	--><link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v6.1.3"><title>Server Lamp su Ubuntu 24.04 e Debian 13 | Pablo Dev</title><meta name="description" content="In questo articolo andiamo a vedere come impostare un server Ubuntu 24.04, Debian 13 di modo che possa essere utilizato come server LAMP, Installando le ultime versioni disponibili di Apache, PHP  e Mariadb. Considereremo il fato che la macchina è una VM Remota oppura una macchina locale."><link rel="canonical" href="https://pablodev.pubcloud.net/blog/0003-server-lamp-su-ubuntu-2404-e-debian-13/"><meta property="og:title" content="Server Lamp su Ubuntu 24.04 e Debian 13 | Pablo Dev"><meta property="og:description" content="In questo articolo andiamo a vedere come impostare un server Ubuntu 24.04, Debian 13 di modo che possa essere utilizato come server LAMP, Installando le ultime versioni disponibili di Apache, PHP  e Mariadb. Considereremo il fato che la macchina è una VM Remota oppura una macchina locale."><meta property="og:url" content="https://pablodev.pubcloud.net/blog/0003-server-lamp-su-ubuntu-2404-e-debian-13/"><meta property="og:type" content="article"><meta property="og:site_name" content="Pablo Dev"><meta property="og:image" content="https://pablodev.pubcloud.net/images/blog/lampubuntudebian.webp"><meta property="article:published_time" content="2026-01-03"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Server Lamp su Ubuntu 24.04 e Debian 13 | Pablo Dev"><meta name="twitter:description" content="In questo articolo andiamo a vedere come impostare un server Ubuntu 24.04, Debian 13 di modo che possa essere utilizato come server LAMP, Installando le ultime versioni disponibili di Apache, PHP  e Mariadb. Considereremo il fato che la macchina è una VM Remota oppura una macchina locale."><meta name="twitter:image" content="https://pablodev.pubcloud.net/images/blog/lampubuntudebian.webp"><link rel="sitemap" href="/sitemap-index.xml"><link rel="icon" href="data:,"><!-- blank favicon --><!-- Bootstrap Icons --><link rel="stylesheet" href="/vendors/bootstrap-icons-1.13.1/bootstrap-icons.min.css"><!-- stili nel file main.scss importati come ultimi --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","name":"Pablo Dev","url":"https://pablodev.pubcloud.net","description":"Sviluppo Software Web & AI Integration","datePublished":"2026-01-03","author":{"@type":"Person","name":"Pablo"}}</script><link rel="stylesheet" href="/_astro/BaseLayout.CFw3ldGN.css"></head> <body> <nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary border-bottom"> <div class="container"> <a class="navbar-brand fw-bold" href="/">Pablo Dev</a> <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button> <div class="collapse navbar-collapse" id="navbarNav"> <ul class="navbar-nav ms-auto gap-2"> <li class="nav-item"> <a class="nav-link" href="/">Home</a> </li> <li class="nav-item"><a class="nav-link" href="/blog">Blog</a></li>
+						<li class="nav-item"><a class="nav-link" href="/progetti">Progetti</a></li>
+						<li class="nav-item"> <a class="nav-link" href="https://www.youtube.com/@pablodev-yt" target="_blank" rel="noopener noreferrer"> <i class="bi bi-youtube me-1"></i>YouTube
+</a> </li>  </ul> </div> </div> </nav> <main>  <article class="container py-5"> <div class="mb-4"> <a href="/blog" class="btn btn-outline-secondary btn-sm"> <i class="bi bi-arrow-left me-1"></i>Tutti gli articoli
+</a> </div> <h1 class="mb-2 text-center">Server Lamp su Ubuntu 24.04 e Debian 13</h1> <p class="text-body-secondary mb-4 text-center"> <i class="bi bi-calendar3 me-1"></i> <time datetime="2026-01-03">3 gennaio 2026</time> </p> <div class="row justify-content-center"> <div class="col-lg-8"> <img src="/images/blog/lampubuntudebian.webp" alt="lamp ubuntu debian" class="article-cover rounded mb-4"> <nav id="toc-container" class="card bg-body-tertiary border mt-4 mb-5 p-3" aria-label="Indice dei contenuti"> <h2 class="h4 text-uppercase text-body-secondary mb-3"> <i class="bi bi-list-ul me-1"></i> Indice
+</h2> <ul class="toc-list" id="toc-list"></ul> </nav> <div id="article-content"> <h2 id="comandi-di-base-e-configurazione-iniziale">Comandi di base e configurazione iniziale</h2>
+<p>Questa guida assume che Linux (Ubuntu o Debian) sia disponibile come macchina remota (attraverso servizi come digital oceans, oppure aruba cloud) oppure che giri come macchina virtuale (VMware).</p>
+<p>Nel caso di una macchina locale la modalità di rete utilizzata è <strong>NAT</strong>, con macchina host Windows 11.</p>
+<p>La guida è compatibile anche se usi linux su Virtualbox, l’unica differenza è come fare il port forwarding</p>
+<h3 id="port-forwarding">Port Forwarding</h3>
+<p>Recperare l’ip della macchina virtuale. Da dentro oracle linux eseguire il comando <code>ip a</code>. Nel mio caso l’ip della macchina è <code>192.168.86.128</code></p>
+<p>Dalla interfaccia di WMware acedi alla voce di menu <code>Edit / Virtual Network Editor</code></p>
+<p>Clicca sul pulsante <strong>Change Settings</strong></p>
+<p><img src="/images/blog/ombcwGwwpv.webp" alt="vmware change setings"></p>
+<p>Clicca sulla riga <strong>VMnet8</strong> e poi su <strong>NAT settings</strong></p>
+<p><img src="/images/blog/dx1dtr5zHS.jpg" alt="vmware nat setings"></p>
+<p>Cliccare sul tasto <strong>Add</strong> e impostare la regole seguendo come da immagine, modificando dove serve</p>
+<p><img src="/images/blog/4t2Bd4K1rk.jpg" alt="vmware nat setings"></p>
+<p>L’immagine precedente imposta la reole per accedere alla macchina con ssh. Per accedere alla macchina posso usare il comando seguente, sostituendo il nome utente reale</p>
+<pre><code>ssh localhost@[nomeutente] -p 34522
+</code></pre>
+<h3 id="vmware-tools">VMWare Tools</h3>
+<p>Nel caso di VMWare è possibile installare i tools eseguendo i seguenti comandi</p>
+<pre><code>sudo apt install open-vm-tools open-vm-tools-desktop
+</code></pre>
+<p>Per controllare la versione dei tools installati</p>
+<pre><code>vmware-toolbox-cmd -v
+</code></pre>
+<p>Per rendere effettive le modifiche riavviare la macchina</p>
+<pre><code>sudo reboot
+</code></pre>
+<h3 id="comandi-di-sistema-essenziali">Comandi di sistema essenziali</h3>
+<p>Ecco i comandi che userai di più nella gestione quotidiana</p>
+<pre><code># Aggiornare il sistema
+sudo apt update
+sudo apt upgrade
+
+# Riavviare / spegnere
+sudo reboot
+sudo poweroff
+
+# Informazioni sul sistema
+uname -a
+cat /etc/os-release
+hostnamectl
+
+# Gestione servizi (systemd)
+sudo systemctl start   [servizio]
+sudo systemctl stop    [servizio]
+sudo systemctl restart [servizio]
+sudo systemctl enable  [servizio]   # avvio automatico al boot
+sudo systemctl disable [servizio]
+sudo systemctl status  [servizio]
+
+# Monitoraggio processi e risorse
+top
+htop          # più leggibile, installa con: sudo apt install htop
+df -h         # spazio disco
+free -h       # memoria RAM
+</code></pre>
+<p>Di seguito ti propongo una serie di programmi base di utilità generale</p>
+<pre><code>sudo apt install wget curl nano zip unzip htop dos2unix curl wget unzip p7zip
+
+# per installare python 
+sudo apt install python3 python3-pip
+
+# per montare file system ntfs
+sudo apt install ntfs-3g
+</code></pre>
+<p>Se stai usando un macchina cloud e devi creare il tuo utente puoi seguire questi comandi (da lanciare con root)</p>
+<pre><code>
+# aggiorna la macchina e poi installa sudo
+apt update &#x26;&#x26; apt install sudo
+
+# Aggiungi l'utente scelto
+adduser [nomeutente]
+
+# aggiungi l'utente al gruppo sudo per eseguire comandi con sudo
+usermod -aG sudo [nomeutente]
+</code></pre>
+<h3 id="impostare-il-timezone">Impostare il timezone</h3>
+<p>Verifica che il tuo timezone sia corretto, e nel caso correggilo con i seguenti comandi</p>
+<pre><code># Verificare
+timedatectl
+
+# Elencare i timezone disponibili (filtrando per Europa)
+sudo timedatectl list-timezones | grep Europe
+
+# Impostare Roma
+sudo timedatectl set-timezone Europe/Rome
+</code></pre>
+<h3 id="gestione-pachetti-con-apt">Gestione pachetti con APT</h3>
+<p><code>apt</code> è il gestore di pacchetti di Ubuntu/Debian. Richiede privilegi di root <code>sudo</code>.</p>
+<pre><code># Prima di installare o cercare pacchetti, aggiorna l'indice locale
+sudo apt update
+
+# per installare un programma
+sudo apt install nome-pacchetto
+
+# Per rimuove il pacchetto ma lascia i file di configurazione
+sudo apt remove nome-pacchetto
+
+# Per rimuove tutto, inclusa la configurazione:
+sudo apt purge nome-pacchetto
+
+# Dopo la rimozione, pulisce le dipendenze orfane:
+sudo apt autoremove
+
+Per vedere tutti i pacchetti installati:
+sudo apt list --installed
+
+Per filtrare per nome:
+sudo apt list --installed | grep nome
+
+Per cercare un pacchetto nei repository
+sudo apt search nome-pacchetto
+
+Per ottenere info di un pacchetto non ancora installato (dai repository):
+sudo apt show nome-pacchetto
+
+Per ottenere info di un pacchetto già installato:
+sudo dpkg -s nome-pacchetto
+</code></pre>
+<h2 id="firewall-ufw">Firewall (ufw)</h2>
+<p><code>ufw</code> (Uncomplicated Firewall) è il frontend semplificato per <strong>iptables</strong> incluso in Ubuntu. Su Debian potrebbe non essere preinstallato.</p>
+<pre><code># Verificare se ufw è installato
+which ufw
+
+# se non è installato lo puoi installare con 
+sudo apt install ufw
+
+# per vedere lo stato del firewall 
+sudo ufw status
+sudo ufw status verbose
+sudo ufw status numbered
+
+# per abilitare o isabilitare il firewall 
+sudo ufw enable
+sudo ufw disable
+
+# l'impostazione di default è blocca tutto il traffico in entrata, permetti tutto in uscita:
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# per permettere connessioni in entrata posso usare diverse strategie
+# posso usare il nome servizio
+sudo ufw allow ssh
+sudo ufw allow http
+sudo ufw allow https
+
+# posso usare il numero porta, oppure porta e protoollo
+sudo ufw allow 22
+sudo ufw allow 8080
+sudo ufw allow 443/tcp
+sudo ufw allow 53/udp
+
+# per bloccare connessioni 
+sudo ufw deny 23
+sudo ufw deny http
+sudo ufw deny 8080/tcp
+
+# per rimuovere una regola
+sudo ufw delete allow 8080
+sudo ufw delete allow http
+sudo ufw delete deny 23
+
+# In alternativa, elenca le regole numerate e rimuovi per numero:
+sudo ufw status numbered
+sudo ufw delete 3
+
+Per fare reset (rimuove tutte le regole)
+sudo ufw reset
+</code></pre>
+<h2 id="ssh-con-autenticazione-a-chiave">SSH con autenticazione a chiave</h2>
+<h3 id="macchian-remota-cloud">Macchian remota cloud</h3>
+<p>L’autenticazione con chiave SSH è più sicura della password. Generi una coppia di chiavi sul tuo PC, copi la chiave pubblica sul server, e da quel momento ti connetti senza digitare la password.</p>
+<p>Genera la coppia di chiavi (sul tuo PC)</p>
+<pre><code># Sul tuo computer locale (Windows PowerShell / macOS / Linux)
+ssh-keygen -t ed25519 -C 'mio-server-ubuntu'
+
+# Ti chiede dove salvare (default: ~/.ssh/id_ed25519)
+# e una passphrase opzionale (consigliata)
+
+# Verrà creata:
+#   ~/.ssh/id_ed25519       (chiave privata - non condividere mai!)
+#   ~/.ssh/id_ed25519.pub   (chiave pubblica - questa va sul server)
+</code></pre>
+<p>Copiare la chiave pubblica sul server</p>
+<pre><code># Metodo 1: ssh-copy-id (Linux/macOS)
+ssh-copy-id -i ~/.ssh/id_ed25519.pub utente@ip-server
+
+# Metodo 2: manuale (se ssh-copy-id non è disponibile)
+# Sul server, crea la cartella .ssh e il file authorized_keys
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+nano ~/.ssh/authorized_keys
+# Incolla il contenuto del file id_ed25519.pub
+chmod 600 ~/.ssh/authorized_keys
+</code></pre>
+<p>Configura SSH sul server</p>
+<pre><code>sudo nano /etc/ssh/sshd_config
+
+# Valori consigliati:
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+PasswordAuthentication no    # disabilita login con password
+PermitRootLogin no           # blocca login diretto come root
+
+# Riavviare il servizio
+sudo systemctl restart sshd
+
+# Aprire la porta SSH nel firewall (se non già aperta)
+sudo firewall-cmd --permanent --add-service=ssh
+sudo firewall-cmd --reload
+</code></pre>
+<p>Crea il file config SSH locale (sul tuo PC). Il file <code>~/.ssh/config</code> ti permette di definire alias e impostazioni per ogni server, evitando di digitare ogni volta ip, utente e chiave.</p>
+<pre><code># ~/.ssh/config
+
+Host ubuntu-cloud
+    HostName 192.168.1.100
+    User mario
+    IdentityFile ~/.ssh/id_ed25519
+    Port 22
+
+Host debian-prod
+    HostName 10.0.0.50
+    User deploy
+    IdentityFile ~/.ssh/id_ed25519_prod
+</code></pre>
+<p>Con questo file puoi connetterti semplicemente con <code>ssh ubuntu-cloud</code></p>
+<h3 id="macchina-locale-vmware">Macchina locale VMWare</h3>
+<p>Con VMware in modalità NAT e il port forwarding configurato, non ti connetti direttamente all’IP della VM ma all’IP dell’host Windows sulla porta mappata.</p>
+<p>Nel mio caso specifico ho fatto port forwarding della porta <strong>34522</strong> dell’host, sulla porta <strong>22</strong> del guest. Quindi per colelgarmi alla machina posso fare come segue</p>
+<pre><code># Da PowerShell o terminale Windows
+ssh mario@127.0.0.1 -p 34522
+
+# Oppure, se ti connetti da un altro PC sulla stessa rete
+ssh mario@192.168.86.128 -p 34522
+</code></pre>
+<p>Se vuoi semplificare il comando, aggiungi una voce al file `~/.ssh/config` sul tuo PC Windows (`C:\Users\mario\.ssh\config`):</p>
+<pre><code>Host ubuntu-dev
+    HostName 127.0.0.1
+    User mario
+    Port 34522
+</code></pre>
+<p>Da quel momento ti basta:</p>
+<pre><code>ssh ubuntu-dev
+</code></pre>
+<h2 id="git-con-github-e-bitbucket">Git con GitHub e Bitbucket</h2>
+<p>Installazione e configurazione base</p>
+<pre><code>sudo apt install git openssh-client
+
+# Configurazione globale
+git config --global user.name 'NomeCognome'
+git config --global user.email 'nome@esempio.it'
+
+# Verificare
+git config --list
+</code></pre>
+<p>Autenticazione con chiave SSH: Sia GitHub che Bitbucket supportano l’autenticazione tramite chiave SSH. Il processo è lo stesso per entrambi.</p>
+<pre><code># Generare una chiave dedicata per GitHub
+ssh-keygen -t ed25519 -C 'mario@esempio.it' -f ~/.ssh/id_github
+
+# Generare una chiave dedicata per Bitbucket
+ssh-keygen -t ed25519 -C 'mario@esempio.it' -f ~/.ssh/id_bitbucket
+
+# Aggiungere le chiavi all'agente SSH
+eval '$(ssh-agent -s)'
+ssh-add ~/.ssh/id_github
+ssh-add ~/.ssh/id_bitbucket
+
+# Visualizzare la chiave pubblica da copiare su GitHub/Bitbucket
+cat ~/.ssh/id_github.pub
+cat ~/.ssh/id_bitbucket.pub
+</code></pre>
+<p>Copia il contenuto di ogni .pub nelle rispettive impostazioni SSH del tuo account:</p>
+<ul>
+<li>GitHub → Settings → SSH Keys</li>
+<li>Bitbucket → Personal settings → SSH keys</li>
+</ul>
+<p>File config SSH per Git</p>
+<pre><code># Aggiungere a ~/.ssh/config
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_github
+
+Host bitbucket.org
+    HostName bitbucket.org
+    User git
+    IdentityFile ~/.ssh/id_bitbucket
+</code></pre>
+<p>Testa la connessione con</p>
+<pre><code>ssh -T git@github.com
+ssh -T git@bitbucket.org
+</code></pre>
+<h2 id="cartelle-condivise-vmware-shared-folders-e-samba">Cartelle condivise (VMware Shared Folders e Samba)</h2>
+<h3 id="vmware-cartella-condivisa">VMWare cartella condivisa</h3>
+<p>Come prima cosa impostare la cartella da condividere con VMware</p>
+<p><img src="/images/blog/7iPp7ilciV.webp" alt="Cartella shre vmware"></p>
+<p>Supponiamo di mondare la cartella condivisa <code>d</code>. Crea la cartella dentro <code>/mnt</code></p>
+<pre><code>sudo mkdir -p /mnt/d
+sudo chown $USER:$USER /mnt/d
+</code></pre>
+<p>Per montare la cartella host sulla cartella <code>/mnt/d</code> di linux lanciare il seguente comando da terminale</p>
+<pre><code>sudo vmhgfs-fuse .host:/ /mnt/d/ -o allow_other -o uid=1000
+</code></pre>
+<p>Oppure puoi montare tutto dentro la cartella <code>/mnt</code></p>
+<pre><code>sudo vmhgfs-fuse .host:/ /mnt/ -o allow_other -o uid=1000
+</code></pre>
+<p>Per scoprire le cartelle condivise `.host:/` dentro usare</p>
+<pre><code>vmware-hgfsclient
+</code></pre>
+<p>Per montare all’avvio della macchina</p>
+<pre><code># Use shared folders between VMWare guest and host
+.host:/    /mnt/d/    fuse.vmhgfs-fuse    defaults,allow_other,uid=1000     0    0
+</code></pre>
+<h3 id="samba---condivisione-cartelle-con-windows">Samba - condivisione cartelle con Windows</h3>
+<p>Samba permette di esporre cartelle Linux come share di rete accessibili da Windows. L’utente Samba avrà lo stesso nome dell’utente Linux (mario), con una password Samba separata.</p>
+<p>Dato che uso NAT sulla macchiana virtuale devo fare il port forwarding di una porta della macchina windows sulla macchina linux</p>
+<pre><code>esempio 34545 -> 445
+</code></pre>
+<p>Procedo con l’installazione di samba</p>
+<pre><code># Installare Samba
+sudo apt install samba samba-common-bin
+
+# Aprire il firewall
+sudo ufw allow samba
+</code></pre>
+<p>Configura la share nel file <code>smb.conf</code>:</p>
+<pre><code>sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.bak
+
+sudo nano /etc/samba/smb.conf
+
+[home-mario]
+    comment = USB Shared Drive
+    path = /mnt/d
+    browseable = yes
+    read only = no
+    writable = yes
+    create mask = 0777
+    directory mask = 0777
+    valid users = mario
+    guest ok = no
+    force user = mario
+    force group = mario
+</code></pre>
+<p>Ora aggiungo la password all’utente samba</p>
+<pre><code>sudo smbpasswd -a mario
+
+# Riavviare Samba
+sudo systemctl restart smbd nmbd
+</code></pre>
+<p>Da Windows, apri Esplora File e digita nella barra degli indirizzi <code>\\ip-del-server</code>. Dato però che ho mappato la porta <code>34545</code> (host) sulla macchina <code>445</code> (linux) posso attaccare una directory di rete teporanea a windows specificando la porta di connessione.</p>
+<pre><code>net use T: \\127.0.0.1\home-mario   /TCPPORT:34545 /user:mario
+
+# per togliere la cartella di rete
+NET USE T: /DELETE
+</code></pre>
+<p>Inserisci come credenziali mario e la password impostata con smbpasswd. Poiché mario è proprietario della propria home, avrà già pieno accesso in lettura e scrittura senza bisogno di modificare permessi.</p>
+<h2 id="stack-lamp">Stack LAMP</h2>
+<h3 id="apache">Apache</h3>
+<p>Installiamo Apache (httpd) e lo configuriamo per supportare WordPress, Laravel e phpMyAdmin.</p>
+<p>Procediamo con l’installazione</p>
+<pre><code># Installazione
+sudo apt install apache2
+
+# Abilitare e avviare
+sudo systemctl enable --now apache2
+</code></pre>
+<p>Il file di configurazione di apache è <code>/etc/apache2/apache2.conf</code></p>
+<p>Inseriamo ServerName “localhost” sotto ServerRoot</p>
+<pre><code>sudo sed -i '/^#ServerRoot "\/etc\/apache2"/a ServerName localhost' /etc/apache2/apache2.conf
+</code></pre>
+<p>Inserisci <code>index.php</code> dentro file dir.conf</p>
+<pre><code>sudo sed -i 's/^DirectoryIndex.*/DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm/' /etc/apache2/mods-enabled/dir.conf
+</code></pre>
+<p>Nel file <code>/etc/apache2/apache2.conf</code> Assicurati di avere la direttiva come segue</p>
+<pre><code>sudo nano /etc/apache2/apache2.conf
+
+&#x3C;Directory /var/www/>
+        ....
+	AllowOverride All
+        ....
+&#x3C;/Directory>
+</code></pre>
+<p>Nel caso tu volessi utilizzare una porta diversa dalla 80 procedi a modificare il file <code>/etc/apache2/ports.conf</code></p>
+<pre><code>sudo nano /etc/apache2/ports.conf
+
+Listen 80   ->   Liste [portascelta]
+</code></pre>
+<p>Se attivo il firewall attiviare https e https</p>
+<pre><code># se devo aprire una porta specifica
+sudo ufw allow 8080
+
+# se le porte sono quelle classiche 80/443
+sudo ufw allow 'Apache Full'
+
+# ricarico firewall
+sudo ufw reload
+</code></pre>
+<p>Per rendere raggiungibile la directory <code>/var/www/html</code> modifichiamo il file <code>000-default.conf</code></p>
+<pre><code>sudo nano /etc/apache2/sites-available/000-default.conf
+
+# se utilizzi una porta diversa dalla 80 modificare la porta
+&#x3C;VirtualHost *:80>
+
+# aggiungere queste direttive
+ServerName localhost
+&#x3C;Directory "/var/www/html">
+    Options Indexes FollowSymLinks MultiViews
+    AllowOverride All
+    Require all granted
+&#x3C;/Directory>
+</code></pre>
+<p>Abilitiamo e disabilitiamo alcuni moduli apache</p>
+<pre><code># modulo multi processi
+sudo a2dismod mpm_prefork
+sudo a2enmod ssl headers mpm_event http2
+</code></pre>
+<p>Testiamo la configurazione e riavviamo apache</p>
+<pre><code>sudo apachectl configtest
+sudo systemctl restart apache2
+</code></pre>
+<p>Per ogni sito crea un file di configurazione separato in <code>/etc/apache2/sites-available</code></p>
+<pre><code>sudo nano /etc/apache2/sites-available/miosito.com.conf
+
+# sostituisci $APACHE_PORT con la porta scelta
+&#x3C;VirtualHost *:$APACHE_PORT>
+    ServerName miosito.com
+    DocumentRoot /var/www/miosito.com
+
+    &#x3C;Directory /var/www/miosito.com>
+        DirectoryIndex index.php index.html
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    &#x3C;/Directory>
+    
+    ErrorLog ${APACHE_LOG_DIR}/miosito_error.log
+    CustomLog ${APACHE_LOG_DIR}/miosito_access.log combined
+&#x3C;/VirtualHost>
+</code></pre>
+<p>Per abilitare/disabilitare il sito appena aggiunto</p>
+<pre><code># abilito sito creando link nella cartella /etc/apache2/sites-enabled/
+sudo a2ensite miosito.com
+
+# rimuovo il link e disabilito sito
+sudo a2dissite miosito.com
+</code></pre>
+<p>Ora controlla che non ci siano errori e riavvia apache</p>
+<pre><code>sudo apache2ctl configtest
+sudo systemctl restart apache2
+</code></pre>
+<p>Se sono in locale per comodità posso aggiungere il mio utente locale al gruppo <strong>www-data</strong> di apache</p>
+<pre><code>sudo usermod -aG www-data $USER
+
+# riavvia macchina
+sudo reboot
+
+# controlla gruppi utente corrente
+groups
+</code></pre>
+<p>D’ora in poi posso aggiornare i permessi della cartella <code>/var/www</code> nel seguente modo (di modo che possA modificare i files con il mio utente locale)</p>
+<pre><code># Imposta permessi corretti
+sudo chown www-data:www-data -R /var/www
+sudo find /var/www -type d -exec chmod 775 {} \;
+sudo find /var/www -type f -exec chmod 664 {} \;
+</code></pre>
+<p>Come utility creo uno script per aggiornare i permessi della cartella corrente, di modo che possa modificare senza problemi i files e cartelle con il mio utente locale</p>
+<pre><code>sudo nano /usr/local/bin/aggiorna_permessi_web.sh
+
+#!/bin/bash
+
+# Define user and group variables
+WEB_USER="www-data"
+WEB_GROUP="www-data"
+
+# Script to update permissions recursively from current directory
+# Usage: ./update_permissions.sh
+
+# Check if running as root or with sudo
+# if [ "$EUID" -ne 0 ]; then
+#   echo "Please run as root or with sudo"
+#   exit 1
+# fi
+
+# Set ownership recursively
+echo "Updating ownership to $WEB_USER:$WEB_GROUP..."
+sudo chown $WEB_USER:$WEB_GROUP -R .
+
+# Set directory permissions (775)
+echo "Setting directory permissions to 775..."
+sudo find . -type d -exec chmod 775 {} \;
+
+# Set file permissions (664)
+echo "Setting file permissions to 664..."
+sudo find . -type f -exec chmod 664 {} \;
+
+echo "Permissions updated successfully!"
+</code></pre>
+<p>Rendi eseguibile lo script con</p>
+<pre><code>sudo chmod +x /usr/local/bin/aggiorna_permessi_web.sh
+</code></pre>
+<p>Per vedere i log di apache</p>
+<pre><code>sudo tail /var/log/apache2/error.log
+sudo tail /var/log/php*-fpm.log
+</code></pre>
+<h3 id="php-85">PHP 8.5</h3>
+<p>Usiamo il repository di <a href="https://launchpad.net/~ondrej/+archive/ubuntu/php">Ondřej Surý</a> per installare l’ultima versione di PHP 8.5</p>
+<p>Per <strong>ubuntu</strong> lancia i seguenti comandi</p>
+<pre><code>sudo LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php # Press enter to confirm.
+sudo apt update
+</code></pre>
+<p>Per <strong>Debian</strong> lancia i seguenti comandi</p>
+<pre><code>sudo apt-get update
+sudo apt-get -y install lsb-release ca-certificates curl apt-transport-https
+
+# Download and add the signing key
+sudo curl -sSLo /tmp/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb
+sudo dpkg -i /tmp/debsuryorg-archive-keyring.deb
+sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+
+sudo apt-get update
+</code></pre>
+<p>Procediamo a installare php</p>
+<pre><code>sudo apt install imagemagick php8.5-{cli,fpm,common,bcmath,mysqli,bz2,curl,gd,gmp,intl,mbstring,readline,xml,xmlrpc,zip,imagick,intl,soap,xdebug}
+</code></pre>
+<p>Il file di configurazione di php dovrebbe essere <code>/etc/php/8.5/fpm/php.ini</code></p>
+<p>Aumenta i limiti di PHP per compatibilità con WordPress e upload di file grandi:</p>
+<pre><code>sudo nano /etc/php/8.5/fpm/php.ini
+
+# Modificare questi valori:
+max_execution_time = 300
+max_input_time = 300
+memory_limit = 512M
+post_max_size = 1024M
+upload_max_filesize = 1024M
+date.timezone = Europe/Rome
+short_open_tag = On
+
+# per configurare cdebug aggiungi in fondo le seguenti righe
+zend_extension=xdebug.so
+xdebug.mode=debug
+xdebug.start_with_request=yes
+xdebug.client_host=localhost
+xdebug.client_port=9003
+xdebug.idekey=vscode
+xdebug.log=/tmp/xdebug.log
+</code></pre>
+<p>Apri vscode e installa l’estensione <strong>PHP Debug</strong>. Inserisci un breakpoint nel codice e dal menu di sinistra clicca su “Run and Debug” e poi sul bottone “Liste for Xdebug”. Prova a navigare la pagina con il browser, l’esecuzione si dovrebbe fermare sul breakpoint impostato</p>
+<p>Abilitiamo alcuni moduli</p>
+<pre><code>sudo a2enmod ssl rewrite
+sudo a2enmod proxy_fcgi setenvif 
+sudo a2enconf php8.5-fpm 
+</code></pre>
+<p>Facciamo un veloce check e riavviamo</p>
+<pre><code>sudo apache2ctl configtest
+sudo systemctl restart apache2 php8.5-fpm
+</code></pre>
+<p>Come debug aggiungiamo il file <code>info.php</code> alla cartella <code>/var/www/html</code></p>
+<pre><code>echo "&#x3C;?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
+sudo chown www-data:www-data /var/www/html/info.php
+</code></pre>
+<p>Verifica lo stato navigando su <code>http://[server_ip]:[apache_porta]</code></p>
+<p>per rimuovere una versione di php</p>
+<pre><code># rimozione php 
+sudo systemctl stop php*-fpm &#x26;&#x26; sudo systemctl disable php*-fpm
+
+# rimozione php e le dipendenze
+sudo apt purge '^php8.4.*'
+sudo apt clean &#x26;&#x26; sudo apt autoclean &#x26;&#x26; sudo apt autoremove
+
+# rimozione file di config
+sudo apt-get --purge remove php*
+sudo rm -rf /etc/php/
+sudo rm -rf /var/log/php*
+
+# verifica che non ci siano più pacchetti installati
+dpkg -l | grep php
+
+# pulizia e riavvio apache2
+sudo apt clean &#x26;&#x26; sudo apt autoclean &#x26;&#x26; sudo apt autoremove &#x26;&#x26; sudo systemctl restart apache2
+</code></pre>
+<h3 id="mariadb">MariaDB</h3>
+<p>Lancia i seguenti comandi</p>
+<pre><code>sudo apt-get install apt-transport-https curl
+sudo mkdir -p /etc/apt/keyrings
+sudo curl -o /etc/apt/keyrings/mariadb-keyring.pgp 'https://mariadb.org/mariadb_release_signing_key.pgp'
+</code></pre>
+<p>Per <strong>Ubuntu 24.04</strong> crea il file <code>/etc/apt/sources.list.d/mariadb.sources</code> con il seguente contenuto</p>
+<pre><code>sudo nano /etc/apt/sources.list.d/mariadb.sources
+
+X-Repolib-Name: MariaDB
+Types: deb
+URIs: https://mirror.mva-n.net/mariadb/repo/12.2/ubuntu
+Suites: noble
+Components: main main/debug
+Signed-By: /etc/apt/keyrings/mariadb-keyring.pgp
+</code></pre>
+<p>Per debian 13 crea invece il seguente file con il seguente contenuto</p>
+<pre><code>sudo nano /etc/apt/sources.list.d/mariadb.sources
+
+X-Repolib-Name: MariaDB
+Types: deb
+URIs: https://mirror.mva-n.net/mariadb/repo/12.2/debian
+Suites: trixie
+Components: main
+Signed-By: /etc/apt/keyrings/mariadb-keyring.pgp
+</code></pre>
+<p>Dopodichè procedi con l’installazione vera e propria</p>
+<pre><code>sudo apt update
+sudo apt install mariadb-server
+</code></pre>
+<p>Abilitiamo all’avvio mariadb e verifichiamo lo status</p>
+<pre><code>sudo systemctl enable mariadb &#x26;&#x26; sudo systemctl status mariadb
+</code></pre>
+<p>Avviamo il wizard di configurazione</p>
+<pre><code>sudo mariadb-secure-installation
+
+# Rispondere così:
+# Enter current password for root: [invio - vuota di default]
+# Switch to unix_socket auth: N
+# Change root password: Y  → inserisci una password sicura
+# Remove anonymous users: Y
+# Disallow root login remotely: Y
+# Remove test database: Y
+# Reload privilege tables: Y
+</code></pre>
+<p>Per rimuovere completamente mariadb</p>
+<pre><code>sudo systemctl stop mariadb &#x26;&#x26; sudo systemctl disable mariadb
+sudo apt purge mariadb*
+sudo rm -rf /var/lib/mysql &#x26;&#x26; sudo rm -rf /etc/mysql
+sudo deluser mysql &#x26;&#x26; sudo delgroup mysql
+
+# nel caso cancellare anche
+sudo rm /etc/apt/sources.list.d/mariadb.sources
+</code></pre>
+<p>Per gestire il database ti riporto alcune query di utilità generale</p>
+<pre><code># Accedere a MariaDB
+mariadb -u root -p
+
+-- Creare un database e un utente
+CREATE DATABASE miosito CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'mario'@'localhost' IDENTIFIED BY 'password-sicura';
+GRANT ALL PRIVILEGES ON miosito.* TO 'mario'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+</code></pre>
+<h2 id="phpmyadmin">phpMyAdmin</h2>
+<p>Scarichiamo l’ultima versione di phpMyAdmin e rendiamo il sito disponibile sotto <code>http://localhost:[PORTA]/pma</code>.</p>
+<p>Procediamo con l’installazione</p>
+<pre><code># scarico sorgenti
+cd /var/www/html 
+sudo wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz
+sudo tar xzf phpMyAdmin-latest-all-languages.tar.gz
+sudo mv phpMyAdmin-*-all-languages pma
+sudo rm phpMyAdmin-latest-all-languages.tar.gz
+
+# modifica file config
+cd pma 
+sudo mv config.sample.inc.php config.inc.php
+sudo sed -i "s/\(\$cfg\['blowfish_secret'\] = '\)[^']*\(';\)/\11234567890abcdef1234567890abcdef\2/" config.inc.php
+
+# per entrare direttamente senza password
+$cfg['Servers'][$i]['user'] = 'root';
+$cfg['Servers'][$i]['password'] = 'password di root';
+$cfg['Servers'][$i]['auth_type'] = 'config';
+$cfg['Servers'][$i]['AllowNoPassword'] = true;
+
+# permission
+cd /var/www/html/pma
+sudo chown -R www-data:www-data .
+sudo find . -type d -exec chmod 775 {} \;
+sudo find . -type f -exec chmod 664 {} \;
+</code></pre>
+<h2 id="wordpress">Wordpress</h2>
+<p>Supponiamo di creare uno script che gestisce la creazione di istanze wordpress sotto la cartella <code>/var/www/html</code>. La porta utilizzata è quella locale di apache overo la <code>34580</code></p>
+<pre><code>sudo nano /usr/local/bin/wp-manager.sh
+</code></pre>
+<pre><code>#!/bin/bash
+# wp-manager.sh - Gestione istanze WordPress
+#
+# Uso:
+#   wp-manager.sh create &#x3C;nome> &#x3C;db_name>
+#   wp-manager.sh delete &#x3C;nome> &#x3C;db_name>
+#   wp-manager.sh list
+
+WEB_ROOT="/var/www/html"
+APACHE_PORT="13380"
+DB_ROOT_PASSWORD="root"
+URL_PREFIX="http://localhost"
+
+create_wp() {
+    SITE=$1
+    DB_NAME=$2
+
+    if [ -z "$SITE" ] || [ -z "$DB_NAME" ]; then
+        echo "Uso: wp-manager.sh create &#x3C;nome> &#x3C;db_name>"
+        exit 1
+    fi
+
+    SITE_DIR="$WEB_ROOT/$SITE"
+
+    if [ -d "$SITE_DIR" ]; then
+        echo "Errore: la cartella $SITE_DIR esiste già."
+        exit 1
+    fi
+
+    echo ">>> Creazione database..."
+    sudo mariadb -u root -p"$DB_ROOT_PASSWORD" -e "
+        DROP DATABASE IF EXISTS $DB_NAME;
+        CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    "
+
+    echo ">>> Download WordPress..."
+    cd /var/www/html
+  
+    if [ -f "latest.tar.gz" ]; then
+        read -p "Il file latest.tar.gz esiste già. Vuoi riscaricarlo? [s/N] " risposta
+        if [ "$risposta" = "s" ] || [ "$risposta" = "S" ]; then
+            sudo rm -f latest.tar.gz
+            sudo wget -q https://wordpress.org/latest.tar.gz
+        fi
+    else
+        sudo wget -q https://wordpress.org/latest.tar.gz
+    fi
+    sudo tar -xzf latest.tar.gz
+    sudo mv wordpress "$SITE"
+    
+
+    echo ">>> Configurazione wp-config.php..."
+    sudo cp "$SITE/wp-config-sample.php" "$SITE/wp-config.php"
+    sudo sed -i "s/database_name_here/$DB_NAME/"     "$SITE/wp-config.php"
+    sudo sed -i "s/username_here/root/"              "$SITE/wp-config.php"
+    sudo sed -i "s/password_here/$DB_ROOT_PASSWORD/" "$SITE/wp-config.php"
+
+    # sostituzioni chiavi salt
+    # Scarica le nuove chiavi
+    NEW_KEYS=$(curl -s https://api.wordpress.org/secret-key/1.1/salt)
+
+    # Individua la prima e l'ultima riga del blocco da sostituire nel file
+    FIRST_LINE=$(grep -n "define( 'AUTH_KEY'" $SITE/wp-config.php | head -1 | cut -d: -f1)
+    LAST_LINE=$(grep -n "define( 'NONCE_SALT'" $SITE/wp-config.php | head -1 | cut -d: -f1)
+
+    # Sostituisce il blocco con le nuove chiavi usando sed
+    sudo sed -i "${FIRST_LINE},${LAST_LINE}d" $SITE/wp-config.php
+    sudo sed -i "$((FIRST_LINE - 1))r /dev/stdin" $SITE/wp-config.php &#x3C;&#x3C;&#x3C; "$NEW_KEYS"
+
+
+    # === 2) Inserimento delle costanti dopo define( 'WP_DEBUG', false ); ===
+    EXTRA_DEFINES="define( 'WP_POST_REVISIONS', 5 );\ndefine( 'WP_AUTO_UPDATE_CORE', false );\ndefine( 'ALLOW_UNFILTERED_UPLOADS', true );"
+    sudo sed -i "/define( 'WP_DEBUG', false );/a ${EXTRA_DEFINES}" $SITE/wp-config.php
+
+
+    echo ">>> Permessi..."
+    sudo chown -R www-data:www-data "$SITE"
+    sudo chmod -R 775 "$SITE"
+    sudo find "$SITE" -type d -exec chmod g+s {} \;
+
+    # echo ">>> Ricarica Apache..."
+    # sudo systemctl reload httpd
+
+    echo ""
+    echo "=== WordPress installato! ==="
+    echo "  Cartella : $SITE_DIR"
+    echo "  Database : $DB_NAME"
+    if [ "$APACHE_PORT" = "80" ]; then
+        echo "  URL      : $URL_PREFIX/$SITE"
+    else
+        echo "  URL      : $URL_PREFIX:$APACHE_PORT/$SITE"
+    fi
+}
+
+delete_wp() {
+    SITE=$1
+    DB_NAME=$2
+
+    if [ -z "$SITE" ] || [ -z "$DB_NAME" ]; then
+        echo "Uso: wp-manager.sh delete &#x3C;nomecartellasito> &#x3C;nomedb>"
+        exit 1
+    fi
+
+    SITE_DIR="$WEB_ROOT/$SITE"
+
+    read -p "Sei sicuro di voler eliminare '$SITE'? (s/N): " CONFIRM
+    if [[ "$CONFIRM" != "s" &#x26;&#x26; "$CONFIRM" != "S" ]]; then
+        echo "Operazione annullata."
+        exit 0
+    fi
+
+    echo ">>> Rimozione cartella..."
+    sudo rm -rf "$SITE_DIR"
+
+    echo ">>> Rimozione database..."
+    sudo mariadb -u root -p"$DB_ROOT_PASSWORD" -e "
+        DROP DATABASE IF EXISTS $DB_NAME;
+    "
+
+}
+
+list_wp() {
+    echo "=== Istanze WordPress in $WEB_ROOT ==="
+    echo ""
+    FOUND=0
+    for DIR in "$WEB_ROOT"/*/; do
+        if [ -f "${DIR}wp-config.php" ]; then
+            FOUND=1
+            NAME=$(basename "$DIR")
+            DB=$(grep "DB_NAME" "${DIR}wp-config.php" | grep -o "'[^']*'" | sed -n '2p' | tr -d "'")
+            echo "  [$NAME]"
+            echo "    Cartella : $DIR"
+            echo "    Database : $DB"
+            if [ "$APACHE_PORT" = "80" ]; then
+                echo "    URL      : $URL_PREFIX/$NAME"
+            else
+                echo "    URL      : $URL_PREFIX:$APACHE_PORT/$NAME"
+            fi
+            echo ""
+        fi
+    done
+    if [ $FOUND -eq 0 ]; then
+        echo "  Nessuna istanza trovata."
+    fi
+}
+
+case "$1" in
+    create) create_wp "$2" "$3" ;;
+    delete) delete_wp "$2" "$3" ;;
+    list)   list_wp ;;
+    *)
+        echo "Uso:"
+        echo "  wp-manager.sh create &#x3C;nome> &#x3C;db_name>"
+        echo "  wp-manager.sh delete &#x3C;nome> &#x3C;db_name>"
+        echo "  wp-manager.sh list"
+        ;;
+esac
+</code></pre>
+<p>Per rendere eseguibile lo script</p>
+<pre><code>sudo chmod +x /usr/local/bin/wp-manager.sh
+</code></pre>
+<p>Esempi d’uso dello script</p>
+<pre><code>wp-manager.sh create miosito miosito_db
+wp-manager.sh delete miosito miosito_db
+wp-manager.sh list
+</code></pre>
+<p>Dopo <code>create</code>, apri il browser su <a href="http://127.0.0.1:%5C%5BPORTA%5C%5D/miosito">http://127.0.0.1:\[PORTA\]/miosito</a> per completare l’installazione di WordPress.</p>
+<h2 id="certificati-ssltls-per-i-siti-apache">Certificati SSL/TLS per i siti Apache</h2>
+<p>Usiamo Certbot con Let’s Encrypt per i siti raggiungibili da internet. Let’s Encrypt fornisce certificati gratuiti e riconosciuti da tutti i browser.</p>
+<pre><code># Installare Certbot
+sudo apt install certbot python3-certbot-apache
+
+# Ottenere e installare il certificato (modifica automaticamente il virtual host)
+sudo certbot --apache
+
+# Certbot chiederà:
+# - indirizzo email per notifiche di scadenza
+# - accettazione termini di servizio
+# - se redirigere HTTP → HTTPS automaticamente (consigliato: sì)
+</code></pre>
+<p>Il certificato viene rinnovato automaticamente. Puoi testare il rinnovo con:</p>
+<pre><code>sudo certbot renew --dry-run
+</code></pre>
+<p>Per controllare il rinnovo</p>
+<pre><code>sudo systemctl status certbot.timer
+</code></pre>
+<p>Per Elencare i certificati Let’s Encrypt gestiti da Certbot</p>
+<pre><code>sudo certbot certificates
+</code></pre>
+<p>Per rimuovere un certificato Let’s Encrypt:</p>
+<pre><code># Revocare e cancellare il certificato
+sudo certbot delete
+
+# Dopo la cancellazione, rimuovere il virtual host HTTPS se non più necessario
+sudo rm /etc/httpd/conf.d/miosito-ssl.conf
+</code></pre>
+<p>Per rinnovare i certificati posso aggiungere anche un job in cron</p>
+<pre><code># sudo crontab -e
+0 12 * * * /usr/bin/certbot renew --quiet
+</code></pre> </div> </div> </div> </article> <script type="module">const a=document.getElementById("article-content"),d=document.getElementById("toc-list"),r=document.getElementById("toc-container");if(a&&d&&r){const o=a.querySelectorAll("h2");o.length===0?r.style.display="none":o.forEach((e,n)=>{e.id||(e.id=`section-${n+1}`);const c=document.createElement("li"),t=document.createElement("a");t.href=`#${e.id}`,t.textContent=e.textContent??"",t.className="text-body-secondary",t.addEventListener("click",l=>{l.preventDefault();const i=document.getElementById(e.id);if(i){const s=i.getBoundingClientRect().top+window.scrollY-80;window.scrollTo({top:s,behavior:"smooth"})}}),c.appendChild(t),d.appendChild(c)})}document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll("pre").forEach(o=>{const e=document.createElement("button");e.innerHTML='<i class="bi bi-clipboard"></i>',e.className="copy-button",e.setAttribute("aria-label","Copia codice"),e.addEventListener("click",async()=>{const c=o.querySelector("code")?.innerText??o.innerText;try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(c);else{const t=document.createElement("textarea");t.value=c,t.style.cssText="position:fixed;opacity:0;pointer-events:none",document.body.appendChild(t),t.select(),document.execCommand("copy"),document.body.removeChild(t)}e.classList.add("copied"),e.setAttribute("aria-label","Copiato!"),setTimeout(()=>{e.classList.remove("copied"),e.setAttribute("aria-label","Copia codice")},2e3)}catch(t){console.error("Errore durante la copia:",t)}});const n=document.createElement("div");n.className="pre-wrapper",o.parentNode&&(o.parentNode.insertBefore(n,o),n.appendChild(o),n.appendChild(e))})});</script>  </main> <!-- ══ FOOTER ══════════════════════════════════════════════════════ --> <footer class="border-top border-secondary-subtle py-5 mt-5"> <div class="container"> <div class="row gy-4 pb-5"> <div class="col-lg-4"> <p class="fw-semibold text-uppercase small mb-3">Pablo Dev</p> <p class="text-secondary small lh-lg mb-4"> Sviluppo Software Web &amp; AI Integration <!-- Freelance Developer &amp; AI Specialist.<br>
+						Sviluppo Web App e integro l'AI nel tuo business. --> </p> <div class="d-flex gap-3"> <a href="https://github.com/pablodevhub" class="text-secondary"><i class="bi bi-github fs-6"></i></a> <a href="https://www.youtube.com/@pablodev-yt" class="text-secondary"><i class="bi bi-youtube fs-6"></i></a>  <a href="mailto:pablodev@outlook.it" class="text-secondary"><i class="bi bi-envelope fs-6"></i></a> </div> </div> <div class="col-6 col-lg-2 offset-lg-4"> <p class="text-uppercase fw-semibold mb-3 small">Navigazione</p> <div class="d-flex flex-column gap-2"> <a href="/" class="text-secondary text-decoration-none small">Home</a> <a href="/blog" class="text-secondary text-decoration-none small">Blog</a>
+						<a href="/progetti" class="text-secondary text-decoration-none small">Progetti</a>  </div> </div> <!-- <div class="col-6 col-lg-2">
+					<p class="text-uppercase fw-semibold mb-3 small">Servizi</p>
+					<div class="d-flex flex-column gap-2">
+					<a href="#" class="text-secondary text-decoration-none small">Siti Vetrina</a>
+					<a href="#" class="text-secondary text-decoration-none small">Web App</a>
+					<a href="#" class="text-secondary text-decoration-none small">Integrazione AI</a>
+					<a href="#" class="text-secondary text-decoration-none small">Consulenza</a>
+					</div>
+				</div> --> <div class="col-6 col-lg-2"> <p class="text-uppercase fw-semibold mb-3 small">Legale</p> <div class="d-flex flex-column gap-2"> <a href="/privacy-policy" class="text-secondary text-decoration-none small">Privacy Policy</a> <a href="/cookie-policy" class="text-secondary text-decoration-none small">Cookie Policy</a> </div> </div> </div> <div class="border-top border-secondary-subtle pt-4 d-flex justify-content-between align-items-center flex-wrap gap-2"> <span class="text-secondary small">&copy; 2026 Pablo. Tutti i diritti riservati.</span> <span class="text-secondary small">P.IVA 10407410967</span> </div> </div> </footer> <!-- <footer class="bg-body-tertiary border-top py-4 mt-5">
+		<div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-body-secondary small">
+		<span>&copy; {new Date().getFullYear()} {SITE_CONFIG.title}. Tutti i diritti riservati.</span>
+		<div class="d-flex gap-3">
+			<a href={`mailto:${SITE_CONFIG.email}`} class="text-body-secondary text-decoration-none">
+				<i class="bi bi-envelope-fill me-1"></i>{SITE_CONFIG.email}
+			</a>
+			<a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noopener noreferrer" class="text-body-secondary text-decoration-none">
+				<i class="bi bi-youtube me-1"></i>YouTube
+			</a>
+		</div>
+		</div>
+	</footer> --> <script src="/scripts/cookie-consent.js" defer></script> <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> --> <script type="module" src="/_astro/BaseLayout.astro_astro_type_script_index_0_lang.GtM1sxkV.js"></script> </body> </html>

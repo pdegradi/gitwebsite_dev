@@ -1,0 +1,907 @@
+<!DOCTYPE html><html lang="it" data-bs-theme="dark"> <head><!-- 
+		preconnect Ottimizza le connessioni esterne 
+		I file di Bootstrap vengono caricati da cdn.jsdelivr.net. Il browser perde tempo a "cercare" dove si trova questo server (DNS lookup) e a stabilire una connessione sicura.
+		Soluzione: Aggiungi queste due righe in cima al tuo <head>, prima di ogni altra cosa: 
+	--><link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v6.1.3"><title>Server Lamp su Alma Linux, Rocky Linux, Oracle Linux 10 | Pablo Dev</title><meta name="description" content="In questo articolo andiamo a vedere come impostare un server AlmaLinux, RockyLinux, Oracle Linux 10 di modo che possa essere utilizato come server LAMP, Installando le ultime versioni disponibili di Apache, PHP  e Mariadb. Considereremo il fato che la macchina è una VM Remota oppura una macchina locale."><link rel="canonical" href="https://pablodev.pubcloud.net/blog/0005-server-lamp-su-alma-linux-rocky-linux-oracle-linux-10/"><meta property="og:title" content="Server Lamp su Alma Linux, Rocky Linux, Oracle Linux 10 | Pablo Dev"><meta property="og:description" content="In questo articolo andiamo a vedere come impostare un server AlmaLinux, RockyLinux, Oracle Linux 10 di modo che possa essere utilizato come server LAMP, Installando le ultime versioni disponibili di Apache, PHP  e Mariadb. Considereremo il fato che la macchina è una VM Remota oppura una macchina locale."><meta property="og:url" content="https://pablodev.pubcloud.net/blog/0005-server-lamp-su-alma-linux-rocky-linux-oracle-linux-10/"><meta property="og:type" content="article"><meta property="og:site_name" content="Pablo Dev"><meta property="og:image" content="https://pablodev.pubcloud.net/images/blog/lamprhel.webp"><meta property="article:published_time" content="2026-01-05"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Server Lamp su Alma Linux, Rocky Linux, Oracle Linux 10 | Pablo Dev"><meta name="twitter:description" content="In questo articolo andiamo a vedere come impostare un server AlmaLinux, RockyLinux, Oracle Linux 10 di modo che possa essere utilizato come server LAMP, Installando le ultime versioni disponibili di Apache, PHP  e Mariadb. Considereremo il fato che la macchina è una VM Remota oppura una macchina locale."><meta name="twitter:image" content="https://pablodev.pubcloud.net/images/blog/lamprhel.webp"><link rel="sitemap" href="/sitemap-index.xml"><link rel="icon" href="data:,"><!-- blank favicon --><!-- Bootstrap Icons --><link rel="stylesheet" href="/vendors/bootstrap-icons-1.13.1/bootstrap-icons.min.css"><!-- stili nel file main.scss importati come ultimi --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","name":"Pablo Dev","url":"https://pablodev.pubcloud.net","description":"Sviluppo Software Web & AI Integration","datePublished":"2026-01-05","author":{"@type":"Person","name":"Pablo"}}</script><link rel="stylesheet" href="/_astro/BaseLayout.CFw3ldGN.css"></head> <body> <nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary border-bottom"> <div class="container"> <a class="navbar-brand fw-bold" href="/">Pablo Dev</a> <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button> <div class="collapse navbar-collapse" id="navbarNav"> <ul class="navbar-nav ms-auto gap-2"> <li class="nav-item"> <a class="nav-link" href="/">Home</a> </li> <li class="nav-item"><a class="nav-link" href="/blog">Blog</a></li>
+						<li class="nav-item"><a class="nav-link" href="/progetti">Progetti</a></li>
+						<li class="nav-item"> <a class="nav-link" href="https://www.youtube.com/@pablodev-yt" target="_blank" rel="noopener noreferrer"> <i class="bi bi-youtube me-1"></i>YouTube
+</a> </li>  </ul> </div> </div> </nav> <main>  <article class="container py-5"> <div class="mb-4"> <a href="/blog" class="btn btn-outline-secondary btn-sm"> <i class="bi bi-arrow-left me-1"></i>Tutti gli articoli
+</a> </div> <h1 class="mb-2 text-center">Server Lamp su Alma Linux, Rocky Linux, Oracle Linux 10</h1> <p class="text-body-secondary mb-4 text-center"> <i class="bi bi-calendar3 me-1"></i> <time datetime="2026-01-05">5 gennaio 2026</time> </p> <div class="row justify-content-center"> <div class="col-lg-8"> <img src="/images/blog/lamprhel.webp" alt="lamp rhel" class="article-cover rounded mb-4"> <nav id="toc-container" class="card bg-body-tertiary border mt-4 mb-5 p-3" aria-label="Indice dei contenuti"> <h2 class="h4 text-uppercase text-body-secondary mb-3"> <i class="bi bi-list-ul me-1"></i> Indice
+</h2> <ul class="toc-list" id="toc-list"></ul> </nav> <div id="article-content"> <h2 id="comandi-di-base-e-configurazione-iniziale">Comandi di base e configurazione iniziale</h2>
+<p>Questa guida assume che Linux (AlmaLinux, RockyLinux, oppure Oracle Linux 10) sia disponibile come macchina remota (attraverso servizi come digital oceans, oppure aruba cloud) oppure che firi come macchina virtuale (VMware).</p>
+<p>Nel caso di una macchina locale la modalità di rete utilizzata è <strong>NAT</strong>, con macchina host Windows 11.</p>
+<p>La guida è compatibile anche se usi linux su Virtualbox, l’unica differenza è come fare i port forwarding</p>
+<h3 id="port-forwarding">Port Forwarding</h3>
+<p>Recperare l’ip della macchina virtuale. Da dentro oracle linux eseguire il comando <code>ip a</code>. Nel mio caso l’ip della macchina è <code>192.168.86.128</code></p>
+<p>Dalla interfaccia di WMware acedi alla voce di menu <code>Edit / Virtual Network Editor</code></p>
+<p>Clicca sul pulsante <strong>Change Settings</strong></p>
+<p><img src="/images/blog/ombcwGwwpv.webp" alt="vmware change setings"></p>
+<p>Clicca sulla riga <strong>VMnet8</strong> e poi su <strong>NAT settings</strong></p>
+<p><img src="/images/blog/dx1dtr5zHS.jpg" alt="vmware nat setings"></p>
+<p>Cliccare sul tasto <strong>Add</strong> e impostare la regole seguendo come da immagine, modificando dove serve</p>
+<p><img src="/images/blog/4t2Bd4K1rk.jpg" alt="vmware nat setings"></p>
+<p>L’immagine precedente imposta la reole per accedere alla macchina con ssh. Per accedere alla macchina posso usare il comando seguente, sostituendo il nome utente reale</p>
+<pre><code>ssh localhost@[nomeutente] -p 34522
+</code></pre>
+<h3 id="comandi-di-sistema-essenziali">Comandi di sistema essenziali</h3>
+<p>Ecco i comandi che userai di più nella gestione quotidiana</p>
+<pre><code># Aggiornare il sistema
+sudo dnf update -y
+
+# Riavviare / spegnere
+sudo reboot
+sudo shutdown -h now
+
+# Informazioni sul sistema
+uname -a
+cat /etc/os-release
+hostnamectl
+
+# Gestione servizi (systemd)
+sudo systemctl start   [servizio]
+sudo systemctl stop    [servizio]
+sudo systemctl restart [servizio]
+sudo systemctl enable  [servizio]   # avvio automatico al boot
+sudo systemctl disable [servizio]
+sudo systemctl status  [servizio]
+
+# Monitoraggio processi e risorse
+top
+htop          # più leggibile, installa con: sudo dnf install htop -y
+df -h         # spazio disco
+free -h       # memoria RAM
+</code></pre>
+<h3 id="abilitare-crb-epel-e-remi">Abilitare CRB, EPEL e REMI</h3>
+<p>Questi repository estendono i pacchetti disponibili su distribuzioni AlmaLinux/RockyLinux/Oracle Linux 10.</p>
+<ul>
+<li><strong>CRB (CodeReady Builder)</strong>: contiene pacchetti di sviluppo e dipendenze che normalmente non sono incluse nel repo base. Molti pacchetti di EPEL e REMI lo richiedono.</li>
+<li><strong>EPEL (Extra Packages for Enterprise Linux)</strong>: repository della community Fedora con centinaia di pacchetti non presenti nei repo ufficiali Red Hat/Oracle.</li>
+<li><strong>REMI</strong>: repository specializzato per versioni aggiornate di PHP, MySQL e software LAMP. Fondamentale per installare PHP 8.5.</li>
+</ul>
+<p>Per Oracle Linux 10 puoi i seguenti comandi</p>
+<pre><code># Command to install the EPEL repository configuration package:
+sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+
+# abilitare crb
+sudo /usr/bin/crb status
+sudo /usr/bin/crb enable
+
+# Command to install the Remi repository configuration package:
+sudo dnf install https://rpms.remirepo.net/enterprise/remi-release-10.rpm
+sudo dnf update
+</code></pre>
+<p>Per AlmaLinux / RockyLinux 10 puoi usare i seguenti comandi</p>
+<pre><code>sudo dnf config-manager --set-enabled crb
+sudo dnf install epel-release
+sudo dnf install https://rpms.remirepo.net/enterprise/remi-release-10.rpm
+sudo dnf update
+</code></pre>
+<h3 id="disabilitare-selinux">Disabilitare SELinux</h3>
+<p>SELinux (Security-Enhanced Linux) è un sistema di controllo degli accessi obligtorio. In produzione va gestito correttamente, ma su un server di sviluppo locale crea spesso problemi con Apache, PHP e la lettura delle cartelle condivise.</p>
+<p>Esegui la seguente linea di codice e poi riavvia la macchina</p>
+<pre><code>sudo sed -i -e "s/^SELINUX=.*/SELINUX=disabled/" /etc/selinux/config
+</code></pre>
+<h3 id="impostare-il-timezone">Impostare il timezone</h3>
+<p>Verifica che il tuo timezone sia corretto, e nel caso correggilo con i seguenti comandi</p>
+<pre><code># Verificare
+timedatectl
+date
+
+# Elencare i timezone disponibili (filtrando per Europa)
+timedatectl list-timezones | grep Europe
+
+# Impostare Roma
+sudo timedatectl set-timezone Europe/Rome
+</code></pre>
+<h3 id="programmi-aggiuntivi">Programmi aggiuntivi</h3>
+<p>Opzionalmente puoi installare i seuenti programmi aggiuntivi</p>
+<pre><code>sudo dnf install wget curl zip unzip nano tar rsync dos2unix
+</code></pre>
+<p>Dopo aver abilitato <strong>epel-release</strong> puoi installare anche i seguenti programmi</p>
+<pre><code>sudo dnf install htop
+</code></pre>
+<h3 id="gestione-pachetti-con-dnf">Gestione pachetti con DNF</h3>
+<pre><code># per vedere i programmi installati
+sudo dnf list installed
+
+# per vedere se un programma è installato
+sudo dnf list installed | grep libreoffice
+
+# per rimuovere un pacchetto e le sue dipendenze
+sudo dnf remove libreoffice*
+
+# pulizia dei pacchetti residui
+sudo dnf autoremove
+sudo dnf clean all
+</code></pre>
+<h2 id="firewall-firewalld">Firewall (firewalld)</h2>
+<p>Oracle Linux 10 usa firewalld come frontend per iptables. Il concetto base è quello delle zone: ogni interfaccia di rete viene assegnata a una zona con regole specifiche. La zona di default è public</p>
+<p>Comandi base</p>
+<pre><code># Stato del firewall
+sudo systemctl status firewalld
+sudo firewall-cmd --state
+
+# Avviare e abilitare al boot
+sudo systemctl enable --now firewalld
+
+# Vedere tutte le regole attive
+sudo firewall-cmd --list-all
+
+# Vedere le zone disponibili
+sudo firewall-cmd --get-zones
+sudo firewall-cmd --get-active-zones
+</code></pre>
+<p>Abilitare servizi http e https</p>
+<pre><code># Aggiungere http e https (permanente)
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+
+# Ricaricare per applicare le modifiche permanenti
+sudo firewall-cmd --reload
+
+# Verificare
+sudo firewall-cmd --list-services
+</code></pre>
+<p>Aprire porte singole</p>
+<pre><code># Aprire la porta 3389 (TCP)
+sudo firewall-cmd --permanent --add-port=3389/tcp
+
+# Aprire una porta custom, es. 8080
+sudo firewall-cmd --permanent --add-port=8080/tcp
+
+# Aprire un range di porte
+sudo firewall-cmd --permanent --add-port=8080-8090/tcp
+
+# Ricaricare
+sudo firewall-cmd --reload
+
+# Verificare le porte aperte
+sudo firewall-cmd --list-ports
+</code></pre>
+<p>Rimuovere regole</p>
+<pre><code># Rimuovere un servizio
+sudo firewall-cmd --permanent --remove-service=http
+
+# Rimuovere una porta
+sudo firewall-cmd --permanent --remove-port=3389/tcp
+
+# Ricaricare
+sudo firewall-cmd --reload
+</code></pre>
+<h2 id="gestione-pacchetti-con-dnf">Gestione pacchetti con DNF</h2>
+<p>DNF è il package manager di Oracle Linux 10 (successore di YUM). Gestisce l’installazione, aggiornamento e rimozione di software.</p>
+<p>Di seguito una serie di comandi base</p>
+<pre><code># Aggiornare tutti i pacchetti
+sudo dnf update -y
+
+# Installare un pacchetto
+sudo dnf install [nome-pacchetto] -y
+
+# Installare più pacchetti
+sudo dnf install wget curl git vim -y
+
+# Rimuovere un pacchetto
+sudo dnf remove [nome-pacchetto] -y
+
+# Cercare un pacchetto
+sudo dnf search [termine]
+
+# Informazioni su un pacchetto
+sudo dnf info [nome-pacchetto]
+
+# Elencare i pacchetti installati
+sudo dnf list installed
+sudo dnf list installed | grep php
+
+# Pulire la cache
+sudo dnf clean all
+
+# Vedere la cronologia delle operazioni
+sudo dnf history
+
+# Annullare l'ultima operazione
+sudo dnf history undo last
+
+# Elencare i gruppi disponibili
+sudo dnf group list
+
+# Installare un gruppo di pacchetti
+sudo dnf group install 'Development Tools' -y
+</code></pre>
+<h2 id="ssh-con-autenticazione-a-chiave">SSH con autenticazione a chiave</h2>
+<h3 id="macchian-remota-cloud">Macchian remota cloud</h3>
+<p>L’autenticazione con chiave SSH è più sicura della password. Generi una coppia di chiavi sul tuo PC, copi la chiave pubblica sul server, e da quel momento ti connetti senza digitare la password.</p>
+<p>Genera la coppia di chiavi (sul tuo PC)</p>
+<pre><code># Sul tuo computer locale (Windows PowerShell / macOS / Linux)
+ssh-keygen -t ed25519 -C 'mio-server-oracle'
+
+# Ti chiede dove salvare (default: ~/.ssh/id_ed25519)
+# e una passphrase opzionale (consigliata)
+
+# Verrà creata:
+#   ~/.ssh/id_ed25519       (chiave privata - non condividere mai!)
+#   ~/.ssh/id_ed25519.pub   (chiave pubblica - questa va sul server)
+</code></pre>
+<p>Copiare la chiave pubblica sul server</p>
+<pre><code># Metodo 1: ssh-copy-id (Linux/macOS)
+ssh-copy-id -i ~/.ssh/id_ed25519.pub utente@ip-server
+
+# Metodo 2: manuale (se ssh-copy-id non è disponibile)
+# Sul server, crea la cartella .ssh e il file authorized_keys
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+nano ~/.ssh/authorized_keys
+# Incolla il contenuto del file id_ed25519.pub
+chmod 600 ~/.ssh/authorized_keys
+</code></pre>
+<p>Configura SSH sul server</p>
+<pre><code>sudo nano /etc/ssh/sshd_config
+
+# Valori consigliati:
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+PasswordAuthentication no    # disabilita login con password
+PermitRootLogin no           # blocca login diretto come root
+
+# Riavviare il servizio
+sudo systemctl restart sshd
+
+# Aprire la porta SSH nel firewall (se non già aperta)
+sudo firewall-cmd --permanent --add-service=ssh
+sudo firewall-cmd --reload
+</code></pre>
+<p>Crea il file config SSH locale (sul tuo PC). Il file <code>~/.ssh/config</code> ti permette di definire alias e impostazioni per ogni server, evitando di digitare ogni volta ip, utente e chiave.</p>
+<pre><code># ~/.ssh/config
+
+Host oracle-dev
+    HostName 192.168.1.100
+    User mario
+    IdentityFile ~/.ssh/id_ed25519
+    Port 22
+
+Host oracle-prod
+    HostName 10.0.0.50
+    User deploy
+    IdentityFile ~/.ssh/id_ed25519_prod
+</code></pre>
+<p>Con questo file puoi connetterti semplicemente con <code>ssh oracle-dev</code></p>
+<h3 id="macchina-locale-vmware">Macchina locale VMWare</h3>
+<p>Con VMware in modalità NAT e il port forwarding configurato, non ti connetti direttamente all’IP della VM ma all’IP dell’host Windows sulla porta mappata.</p>
+<p>Nel mio caso specifico ho fatto port forwarding della porta <strong>34522</strong> dell’host, sulla porta <strong>22</strong> del guest. Quindi per colelgarmi alla machina posso fare come segue</p>
+<pre><code># Da PowerShell o terminale Windows
+ssh mario@127.0.0.1 -p 34522
+
+# Oppure, se ti connetti da un altro PC sulla stessa rete
+ssh mario@192.168.86.128 -p 34522
+</code></pre>
+<p>Se vuoi semplificare il comando, aggiungi una voce al file `~/.ssh/config` sul tuo PC Windows (`C:\Users\mario\.ssh\config`):</p>
+<pre><code>Host oracle-dev
+    HostName 127.0.0.1
+    User mario
+    Port 34522
+</code></pre>
+<p>Da quel momento ti basta:</p>
+<pre><code>ssh oracle-dev
+</code></pre>
+<h2 id="git-con-github-e-bitbucket">Git con GitHub e Bitbucket</h2>
+<p>Installazione e configurazione base</p>
+<pre><code>sudo dnf install git
+
+# Configurazione globale
+git config --global user.name 'NomeCognome'
+git config --global user.email 'nome@esempio.it'
+
+# Verificare
+git config --list
+</code></pre>
+<p>Autenticazione con chiave SSH: Sia GitHub che Bitbucket supportano l’autenticazione tramite chiave SSH. Il processo è lo stesso per entrambi.</p>
+<pre><code># Generare una chiave dedicata per GitHub
+ssh-keygen -t ed25519 -C 'mario@esempio.it' -f ~/.ssh/id_github
+
+# Generare una chiave dedicata per Bitbucket
+ssh-keygen -t ed25519 -C 'mario@esempio.it' -f ~/.ssh/id_bitbucket
+
+# Aggiungere le chiavi all'agente SSH
+eval '$(ssh-agent -s)'
+ssh-add ~/.ssh/id_github
+ssh-add ~/.ssh/id_bitbucket
+
+# Visualizzare la chiave pubblica da copiare su GitHub/Bitbucket
+cat ~/.ssh/id_github.pub
+cat ~/.ssh/id_bitbucket.pub
+</code></pre>
+<p>Copia il contenuto di ogni .pub nelle rispettive impostazioni SSH del tuo account:</p>
+<ul>
+<li>GitHub → Settings → SSH Keys</li>
+<li>Bitbucket → Personal settings → SSH keys</li>
+</ul>
+<p>File config SSH per Git</p>
+<pre><code># Aggiungere a ~/.ssh/config
+
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_github
+
+Host bitbucket.org
+    HostName bitbucket.org
+    User git
+    IdentityFile ~/.ssh/id_bitbucket
+</code></pre>
+<p>Testa la connessione con</p>
+<pre><code>ssh -T git@github.com
+ssh -T git@bitbucket.org
+</code></pre>
+<h2 id="cartelle-condivise-vmware-shared-folders-e-samba">Cartelle condivise (VMware Shared Folders e Samba)</h2>
+<h3 id="vmware-cartella-condivisa">VMWare cartella condivisa</h3>
+<p>Come prima cosa impostare la cartella da condividere con VMware</p>
+<p><img src="/images/blog/7iPp7ilciV.webp" alt="Cartella shre vmware"></p>
+<p>Supponiamo di mondare la cartella condivisa <code>d</code>. Crea la cartella dentro <code>/mnt</code></p>
+<pre><code>sudo mkdir -p /mnt/d
+sudo chown $USER:$USER /mnt/d
+</code></pre>
+<p>Per montare la cartella host sulla cartella <code>/mnt/d</code> di linux lanciare il seguente comando da terminale</p>
+<pre><code>sudo vmhgfs-fuse .host:/ /mnt/d/ -o allow_other -o uid=1000
+</code></pre>
+<p>Oppure puoi montare tutto dentro la cartella <code>/mnt</code></p>
+<pre><code>sudo vmhgfs-fuse .host:/ /mnt/ -o allow_other -o uid=1000
+</code></pre>
+<p>Per scoprire le cartelle condivise `.host:/` dentro usare</p>
+<pre><code>vmware-hgfsclient
+</code></pre>
+<p>Per montare all’avvio della macchina</p>
+<pre><code># Use shared folders between VMWare guest and host
+.host:/    /mnt/d/    fuse.vmhgfs-fuse    defaults,allow_other,uid=1000     0    0
+</code></pre>
+<h3 id="samba---condivisione-cartelle-con-windows">Samba - condivisione cartelle con Windows</h3>
+<p>Samba permette di esporre cartelle Linux come share di rete accessibili da Windows. L’utente Samba avrà lo stesso nome dell’utente Linux (mario), con una password Samba separata.</p>
+<p>Dato che uso NAT sulla macchiana virtuale devo fare il port forwarding di una porta della macchina windows sulla macchina linux</p>
+<pre><code>esempio 34545 -> 445
+</code></pre>
+<p>Procedo con l’installazione di samba</p>
+<pre><code># Installare Samba
+sudo dnf install samba samba-client
+
+# Abilitare e avviare
+sudo systemctl enable --now smb nmb
+
+# Aprire il firewall
+sudo firewall-cmd --permanent --add-service=samba
+sudo firewall-cmd --reload
+</code></pre>
+<p>Configura la share nel file <code>smb.conf</code>:</p>
+<pre><code># sudo nano /etc/samba/smb.conf
+[home-mario]
+    comment = Home di Mario
+    path = /home/mario
+    valid users = mario
+    read only = no
+    browsable = yes
+    create mask = 0664
+    directory mask = 0775
+    force user = mario
+    force group = mario
+</code></pre>
+<p>Ora aggiungo la password all’utente samba</p>
+<pre><code>sudo smbpasswd -a mario
+
+# Riavviare Samba
+sudo systemctl restart smb
+</code></pre>
+<p>Da Windows, apri Esplora File e digita nella barra degli indirizzi <code>\\ip-del-server</code>. Dato però che ho mappato la porta <code>34545</code> (host) sulla macchina <code>445</code> (linux) posso attaccare una directory di rete teporanea a windows specificando la porta di connessione.</p>
+<pre><code>net use T: \\127.0.0.1\home-mario   /TCPPORT:34545 /user:mario
+
+# per togliere la cartella di rete
+NET USE T: /DELETE
+</code></pre>
+<p>Inserisci come credenziali mario e la password impostata con smbpasswd. Poiché mario è proprietario della propria home, avrà già pieno accesso in lettura e scrittura senza bisogno di modificare permessi.</p>
+<h2 id="stack-lamp">Stack LAMP</h2>
+<h3 id="apache">Apache</h3>
+<p>Installiamo Apache (httpd) e lo configuriamo per supportare WordPress, Laravel e phpMyAdmin.</p>
+<p>Procediamo con l’installazione</p>
+<pre><code># Installazione
+sudo dnf install httpd httpd-tools mod_ssl
+
+# Abilitare e avviare
+sudo systemctl enable --now httpd
+</code></pre>
+<p>Se la macchina è remota agiungiamo le seguenti regole al firewall</p>
+<pre><code># lancia i seguenti comandi per aprire il firewall
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --reload
+</code></pre>
+<p>Se stai usando la macchina locale con NAT di seguito considero di aver fatto il port forwarding dalla porta <strong>34580</strong> (host) alla <strong>34580</strong> (guest). Quindi il web server apache risponderà all’indirizzo <code>http://localhost:34580</code>. Apporta le seguenti modifiche</p>
+<pre><code>sudo nano /etc/httpd/conf/httpd.conf
+
+# Assicurati che ci sia la seguente riga:
+Listen 34580
+    
+# lancia i seguenti comandi per aprire il firewall
+sudo firewall-cmd --zone=public --permanent --add-port=34580/tcp 
+sudo firewall-cmd --reload
+</code></pre>
+<p>La root di Apache sarà <code>/var/www</code>. Quando accedi a localhost la root è <code>/var/www/html</code></p>
+<p>Modifica il file di configurazione principale:</p>
+<pre><code>sudo nano /etc/httpd/conf/httpd.conf
+
+# assicurati che ci sia "AllowOverride All" 
+&#x3C;Directory "/var/www/html">
+ ....
+ AllowOverride All
+</code></pre>
+<p>Aggiungi il virtualhost per la cartella <code>/var/www/html</code> che risponde all’indirizzo ip della macchina. Sostituisci <strong>$APACHE_PORT</strong> con la porta corretta.</p>
+<pre><code>sudo nano /etc/httpd/conf.d/000-default.conf
+
+&#x3C;VirtualHost *:$APACHE_PORT>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/html
+  
+	&#x3C;Directory "/var/www/html">
+		Options -Indexes +FollowSymLinks
+		AllowOverride All
+		Require all granted
+	&#x3C;/Directory>
+  
+	ErrorLog /var/log/httpd/error.log
+	CustomLog /var/log/httpd/access.log combined
+&#x3C;/VirtualHost>
+</code></pre>
+<p>Riavvia Apache e controlla lo status</p>
+<pre><code>sudo systemctl restart httpd
+sudo systemctl status httpd
+</code></pre>
+<p>Per ogni sito crea un file di configurazione separato in <code>/etc/httpd/conf.d/</code>:</p>
+<pre><code>sudo nano /etc/httpd/conf.d/miosito.conf
+
+&#x3C;VirtualHost *:$APACHE_PORT>
+    ServerName miosito.local
+    DocumentRoot /var/www/miosito
+
+    &#x3C;Directory /var/www/miosito>
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    &#x3C;/Directory>
+    
+    ErrorLog /var/log/httpd/miosito-error.log
+    CustomLog /var/log/httpd/miosito-access.log combined
+&#x3C;/VirtualHost>
+</code></pre>
+<p>Se sono in locale per comodità posso aggiungere il mio utente locale al gruppo <strong>apache</strong></p>
+<pre><code>sudo usermod -aG apache $USER
+
+# riavvia macchina
+sudo reboot
+
+# controlla gruppi utente corrente
+groups
+</code></pre>
+<p>D’ora in poi posso aggiornare i permessi della cartella <code>/var/www</code> nel seguente modo (di modo che posso modificare i files con il mio utente locale)</p>
+<pre><code># Imposta permessi corretti
+sudo chown -R apache:apache /var/www
+sudo find /var/www -type d -exec chmod 775 {} \;
+sudo find /var/www -type f -exec chmod 664 {} \;
+</code></pre>
+<p>Come utility creo uno script per aggiornare i permessi della cartella corrente, di modo che possa modificare senza problemi i files e cartelle con il mio utente locale</p>
+<pre><code>sudo nano /usr/local/bin/aggiorna_permessi_web.sh
+
+#!/bin/bash
+
+# Define user and group variables
+WEB_USER="apache"
+WEB_GROUP="apache"
+
+# Script to update permissions recursively from current directory
+# Usage: ./update_permissions.sh
+
+# Check if running as root or with sudo
+# if [ "$EUID" -ne 0 ]; then
+#   echo "Please run as root or with sudo"
+#   exit 1
+# fi
+
+# Set ownership recursively
+echo "Updating ownership to $WEB_USER:$WEB_GROUP..."
+sudo chown $WEB_USER:$WEB_GROUP -R .
+
+# Set directory permissions (775)
+echo "Setting directory permissions to 775..."
+sudo find . -type d -exec chmod 775 {} \;
+
+# Set file permissions (664)
+echo "Setting file permissions to 664..."
+sudo find . -type f -exec chmod 664 {} \;
+
+echo "Permissions updated successfully!"
+</code></pre>
+<p>Rendi eseguibile lo script con</p>
+<pre><code>sudo chmod +x /usr/local/bin/aggiorna_permessi_web.sh
+</code></pre>
+<p>Per vedere i log di apache</p>
+<pre><code># Log di errore principale
+sudo tail -f /var/log/httpd/error_log
+
+# Log accessi
+sudo tail -f /var/log/httpd/access_log
+
+# Log dei virtual host specifici
+sudo tail -f /var/log/httpd/miosito-error.log
+
+# Testare la configurazione senza riavviare
+sudo apachectl configtest
+
+# Ricaricare la configurazione
+sudo systemctl reload httpd
+</code></pre>
+<h3 id="php-85">PHP 8.5</h3>
+<p>Usiamo il repository REMI per installare PHP 8.5</p>
+<pre><code>sudo dnf module reset php
+
+# per vedere i moduli php
+sudo dnf module list php
+
+# abilita il modulo per php8.5
+sudo dnf module enable php:remi-8.5
+</code></pre>
+<p>Installiamo php</p>
+<pre><code>sudo dnf install php php-cli php-fpm php-mysqlnd php-zip php-devel php-gd php-mcrypt php-mbstring php-curl php-xml php-pear php-bcmath php-json php-opcache php-intl php-soap php-xmlrpc php-gettext php-ldap php-imap php-odbc php-pdo php-common php-process php-imagick php-xdebug
+</code></pre>
+<p>Per verificare la versione</p>
+<pre><code>php -v
+</code></pre>
+<p>Aumenta i limiti di PHP per compatibilità con WordPress e upload di file grandi:</p>
+<pre><code># Trovare il percorso del php.ini
+php --ini
+
+# Di solito si trova in /etc/php.ini
+sudo nano /etc/php.ini
+
+# Modificare questi valori:
+max_execution_time = 300
+max_input_time = 300
+upload_max_filesize = 64M
+post_max_size = 64M
+memory_limit = 512M
+date.timezone = Europe/Rome
+</code></pre>
+<p>Configuriamo XDebug</p>
+<pre><code># Trovare il file di configurazione xdebug
+php --ini | grep xdebug
+
+# modifica il file xdebug.ini
+sudo nano /etc/php.d/15-xdebug.ini
+
+# contenuto da aggiungere
+xdebug.mode = debug
+xdebug.start_with_request = yes
+xdebug.client_host = localhost
+xdebug.client_port = 9003
+</code></pre>
+<p>Riavviamo apache e controlliamo che sia caricato il modulo xdebug</p>
+<pre><code># Riavviare Apache
+sudo systemctl restart httpd php-fpm
+
+# Verificare che Xdebug sia caricato
+php -m | grep xdebug
+</code></pre>
+<p>Come debug aggiungiamo il file <code>info.php</code> alla cartella <code>/var/www/html</code></p>
+<pre><code>echo "&#x3C;?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
+sudo chown apache:apache /var/www/html/info.php
+</code></pre>
+<p>Verifica lo stato navigando su <code>http://[server_ip]:[apache_porta]</code></p>
+<h3 id="mariadb">MariaDB</h3>
+<p>Creiamo il file <code>/etc/yum.repos.d/MariaDB.repo</code> e aggiungiamo ils eguente contenuto</p>
+<pre><code>sudo nano /etc/yum.repos.d/MariaDB.repo
+
+[mariadb]
+name = MariaDB
+baseurl = https://mirror1.hs-esslingen.de/pub/Mirrors/mariadb/yum/12.2/rhel/$releasever/$basearch
+gpgkey = https://mirror1.hs-esslingen.de/pub/Mirrors/mariadb/yum/RPM-GPG-KEY-MariaDB
+gpgcheck = 1
+</code></pre>
+<p>Installa mariadb con il seguente comando</p>
+<pre><code>sudo dnf install MariaDB-server MariaDB-client
+</code></pre>
+<p>In aggiunta prosegui con i seguenti comandi</p>
+<pre><code># Abilitare e avviare
+sudo systemctl enable --now mariadb
+
+# Verificare la versione
+mariadb --version
+
+# Wizard di configurazione sicurezza (imposta password root, rimuove utenti anonimi, ecc.)
+sudo mariadb-secure-installation
+
+# Rispondere così:
+# Enter current password for root: [invio - vuota di default]
+# Switch to unix_socket auth: N
+# Change root password: Y  → inserisci una password sicura
+# Remove anonymous users: Y
+# Disallow root login remotely: Y
+# Remove test database: Y
+# Reload privilege tables: Y
+</code></pre>
+<p>Per gestire il database ti riporto alcune query di utilità generale</p>
+<pre><code># Accedere a MariaDB
+mariadb -u root -p
+
+-- Creare un database e un utente
+CREATE DATABASE miosito CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'mario'@'localhost' IDENTIFIED BY 'password-sicura';
+GRANT ALL PRIVILEGES ON miosito.* TO 'mario'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+</code></pre>
+<h2 id="phpmyadmin">phpMyAdmin</h2>
+<p>Scarichiamo l’ultima versione di phpMyAdmin e rendiamo il sito disponibile sotto <code>http://localhost:[PORTA]/pma</code>.</p>
+<p>Procediamo con l’installazione</p>
+<pre><code># mi spoto nella cartella /var/www/html
+cd /var/www/html
+
+# Scaricare l'ultima versione (controlla la versione corrente su phpmyadmin.net)
+sudo wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz
+
+# Estrarre
+sudo tar -xzf phpMyAdmin-latest-all-languages.tar.gz
+sudo mv phpMyAdmin-*-all-languages pma
+
+# pulizia 
+sudo rm phpMyAdmin-latest-all-languages.tar.gz
+
+# Creare la cartella temporanea
+sudo mkdir -p /var/www/html/pma/tmp
+
+# Permessi
+sudo chown -R apache:apache /var/www/html/pma
+sudo find /var/www/html/pma -type d -exec chmod 775 {} \;
+sudo find /var/www/html/pma -type f -exec chmod 664 {} \;
+</code></pre>
+<p>Modifichiamo il file di configurazione di phpmyadmin</p>
+<pre><code># Generare una stringa casuale per blowfish_secret (es. con openssl):
+openssl rand -hex 16
+
+# Copiare il file di config di esempio
+sudo cp /var/www/html/pma/config.sample.inc.php /var/www/html/pma/config.inc.php
+
+sudo nano /var/www/html/pma/config.inc.php
+
+# Impostare nel file:
+$cfg['blowfish_secret'] = 'stringa-generata-da-openssl-qui';
+$cfg['TempDir'] = '/var/www/html/pma/tmp';
+
+# per eseguire il login automatico (AMBIENTE LOCALE) aggiungere o modificare i seguenti parametri
+$cfg['Servers'][$i]['host'] = 'localhost';
+$cfg['Servers'][$i]['user'] = 'root';
+$cfg['Servers'][$i]['password'] = 'password di root';
+$cfg['Servers'][$i]['auth_type'] = 'config';
+$cfg['Servers'][$i]['AllowNoPassword'] = true;
+</code></pre>
+<h2 id="wordpress">Wordpress</h2>
+<p>Supponiamo di creare uno script che gestisce la creazione di istanze wordpress sotto la cartella <code>/var/www/html</code>. In questo specifico caso non ho bisogno di creare un file virtualhost. La porta utilizzata è quella locale di apache overo la <code>34580</code>. All’inizio dello script ci sono una serie di variabili da modificare secondo il tuo specifico caso</p>
+<pre><code>sudo nano /usr/local/bin/wp-manager.sh
+</code></pre>
+<pre><code>#!/bin/bash
+# wp-manager.sh - Gestione istanze WordPress
+#
+# Uso:
+#   wp-manager.sh create &#x3C;nome> &#x3C;db_name>
+#   wp-manager.sh delete &#x3C;nome> &#x3C;db_name>
+#   wp-manager.sh list
+
+WEB_ROOT="/var/www/html"
+APACHE_PORT="34580"
+DB_ROOT_PASSWORD="root"
+URL_PREFIX="http://localhost"
+
+create_wp() {
+    SITE=$1
+    DB_NAME=$2
+
+    if [ -z "$SITE" ] || [ -z "$DB_NAME" ]; then
+        echo "Uso: wp-manager.sh create &#x3C;nome> &#x3C;db_name>"
+        exit 1
+    fi
+
+    SITE_DIR="$WEB_ROOT/$SITE"
+
+    if [ -d "$SITE_DIR" ]; then
+        echo "Errore: la cartella $SITE_DIR esiste già."
+        exit 1
+    fi
+
+    echo ">>> Creazione database..."
+    sudo mariadb -u root -p"$DB_ROOT_PASSWORD" -e "
+        DROP DATABASE IF EXISTS $DB_NAME;
+        CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    "
+
+    echo ">>> Download WordPress..."
+    cd /var/www/html
+  
+    if [ -f "latest.tar.gz" ]; then
+        read -p "Il file latest.tar.gz esiste già. Vuoi riscaricarlo? [s/N] " risposta
+        if [ "$risposta" = "s" ] || [ "$risposta" = "S" ]; then
+            sudo rm -f latest.tar.gz
+            sudo wget -q https://wordpress.org/latest.tar.gz
+        fi
+    else
+        sudo wget -q https://wordpress.org/latest.tar.gz
+    fi
+    sudo tar -xzf latest.tar.gz
+    sudo mv wordpress "$SITE"
+    
+
+    echo ">>> Configurazione wp-config.php..."
+    sudo cp "$SITE/wp-config-sample.php" "$SITE/wp-config.php"
+    sudo sed -i "s/database_name_here/$DB_NAME/"     "$SITE/wp-config.php"
+    sudo sed -i "s/username_here/root/"              "$SITE/wp-config.php"
+    sudo sed -i "s/password_here/$DB_ROOT_PASSWORD/" "$SITE/wp-config.php"
+
+    # sostituzioni chiavi salt
+    # Scarica le nuove chiavi
+    NEW_KEYS=$(curl -s https://api.wordpress.org/secret-key/1.1/salt)
+
+    # Individua la prima e l'ultima riga del blocco da sostituire nel file
+    FIRST_LINE=$(grep -n "define( 'AUTH_KEY'" $SITE/wp-config.php | head -1 | cut -d: -f1)
+    LAST_LINE=$(grep -n "define( 'NONCE_SALT'" $SITE/wp-config.php | head -1 | cut -d: -f1)
+
+    # Sostituisce il blocco con le nuove chiavi usando sed
+    sudo sed -i "${FIRST_LINE},${LAST_LINE}d" $SITE/wp-config.php
+    sudo sed -i "$((FIRST_LINE - 1))r /dev/stdin" $SITE/wp-config.php &#x3C;&#x3C;&#x3C; "$NEW_KEYS"
+
+
+    # === 2) Inserimento delle costanti dopo define( 'WP_DEBUG', false ); ===
+    EXTRA_DEFINES="define( 'WP_POST_REVISIONS', 5 );\ndefine( 'WP_AUTO_UPDATE_CORE', false );\ndefine( 'ALLOW_UNFILTERED_UPLOADS', true );"
+    sudo sed -i "/define( 'WP_DEBUG', false );/a ${EXTRA_DEFINES}" $SITE/wp-config.php
+
+
+    echo ">>> Permessi..."
+    sudo chown -R apache:apache "$SITE"
+    sudo chmod -R 775 "$SITE"
+    sudo find "$SITE" -type d -exec chmod g+s {} \;
+
+    # echo ">>> Ricarica Apache..."
+    # sudo systemctl reload httpd
+
+    echo ""
+    echo "=== WordPress installato! ==="
+    echo "  Cartella : $SITE_DIR"
+    echo "  Database : $DB_NAME"
+    if [ "$APACHE_PORT" = "80" ]; then
+        echo "  URL      : $URL_PREFIX/$SITE"
+    else
+        echo "  URL      : $URL_PREFIX:$APACHE_PORT/$SITE"
+    fi
+}
+
+delete_wp() {
+    SITE=$1
+    DB_NAME=$2
+
+    if [ -z "$SITE" ] || [ -z "$DB_NAME" ]; then
+        echo "Uso: wp-manager.sh delete &#x3C;nomecartellasito> &#x3C;nomedb>"
+        exit 1
+    fi
+
+    SITE_DIR="$WEB_ROOT/$SITE"
+
+    read -p "Sei sicuro di voler eliminare '$SITE'? (s/N): " CONFIRM
+    if [[ "$CONFIRM" != "s" &#x26;&#x26; "$CONFIRM" != "S" ]]; then
+        echo "Operazione annullata."
+        exit 0
+    fi
+
+    echo ">>> Rimozione cartella..."
+    sudo rm -rf "$SITE_DIR"
+
+    echo ">>> Rimozione database..."
+    sudo mariadb -u root -p"$DB_ROOT_PASSWORD" -e "
+        DROP DATABASE IF EXISTS $DB_NAME;
+    "
+
+}
+
+list_wp() {
+    echo "=== Istanze WordPress in $WEB_ROOT ==="
+    echo ""
+    FOUND=0
+    for DIR in "$WEB_ROOT"/*/; do
+        if [ -f "${DIR}wp-config.php" ]; then
+            FOUND=1
+            NAME=$(basename "$DIR")
+            DB=$(grep "DB_NAME" "${DIR}wp-config.php" | grep -o "'[^']*'" | sed -n '2p' | tr -d "'")
+            echo "  [$NAME]"
+            echo "    Cartella : $DIR"
+            echo "    Database : $DB"
+            if [ "$APACHE_PORT" = "80" ]; then
+                echo "    URL      : $URL_PREFIX/$NAME"
+            else
+                echo "    URL      : $URL_PREFIX:$APACHE_PORT/$NAME"
+            fi
+            echo ""
+        fi
+    done
+    if [ $FOUND -eq 0 ]; then
+        echo "  Nessuna istanza trovata."
+    fi
+}
+
+case "$1" in
+    create) create_wp "$2" "$3" ;;
+    delete) delete_wp "$2" "$3" ;;
+    list)   list_wp ;;
+    *)
+        echo "Uso:"
+        echo "  wp-manager.sh create &#x3C;nome> &#x3C;db_name>"
+        echo "  wp-manager.sh delete &#x3C;nome> &#x3C;db_name>"
+        echo "  wp-manager.sh list"
+        ;;
+esac
+</code></pre>
+<p>Per rendere eseguibile lo script</p>
+<pre><code>sudo chmod +x /usr/local/bin/wp-manager.sh
+</code></pre>
+<p>Esempi d’uso dello script</p>
+<pre><code># creo una nuova istanza con nome cartella "miosito" e nome database "miosito_db"
+wp-manager.sh create miosito miosito_db
+
+# elenco le istanze disponbili
+wp-manager.sh list
+
+# cancello l'istanza con nome cartella "miosito" e nome database "miosito_db"
+wp-manager.sh delete miosito miosito_db
+</code></pre>
+<p>Dopo <code>create</code>, apri il browser su <code>http://localhost:34580/miosito</code> per completare l’installazione di WordPress.</p>
+<h2 id="certificati-ssltls-per-i-siti-apache">Certificati SSL/TLS per i siti Apache</h2>
+<p>Usiamo Certbot con Let’s Encrypt per i siti raggiungibili da internet. Let’s Encrypt fornisce certificati gratuiti e riconosciuti da tutti i browser.</p>
+<pre><code># Installare Certbot
+sudo dnf install certbot python3-certbot-apache -y
+
+# Ottenere e installare il certificato (modifica automaticamente il virtual host)
+sudo certbot --apache -d miosito.com -d www.miosito.com
+
+# Certbot chiederà:
+# - indirizzo email per notifiche di scadenza
+# - accettazione termini di servizio
+# - se redirigere HTTP → HTTPS automaticamente (consigliato: sì)
+</code></pre>
+<p>Il certificato viene rinnovato automaticamente. Puoi testare il rinnovo con:</p>
+<pre><code>sudo certbot renew --dry-run
+</code></pre>
+<p>Per Elencare i certificati Let’s Encrypt gestiti da Certbot</p>
+<pre><code>sudo certbot certificates
+</code></pre>
+<p>Per rimuovere un certificato Let’s Encrypt:</p>
+<pre><code># Revocare e cancellare il certificato
+sudo certbot delete --cert-name miosito.com
+
+# In alternativa, solo revocare (mantiene i file)
+sudo certbot revoke --cert-path /etc/letsencrypt/live/miosito.com/fullchain.pem
+
+# Dopo la cancellazione, rimuovere il virtual host HTTPS se non più necessario
+sudo rm /etc/httpd/conf.d/miosito-ssl.conf
+sudo systemctl reload httpd
+</code></pre> </div> </div> </div> </article> <script type="module">const a=document.getElementById("article-content"),d=document.getElementById("toc-list"),r=document.getElementById("toc-container");if(a&&d&&r){const o=a.querySelectorAll("h2");o.length===0?r.style.display="none":o.forEach((e,n)=>{e.id||(e.id=`section-${n+1}`);const c=document.createElement("li"),t=document.createElement("a");t.href=`#${e.id}`,t.textContent=e.textContent??"",t.className="text-body-secondary",t.addEventListener("click",l=>{l.preventDefault();const i=document.getElementById(e.id);if(i){const s=i.getBoundingClientRect().top+window.scrollY-80;window.scrollTo({top:s,behavior:"smooth"})}}),c.appendChild(t),d.appendChild(c)})}document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll("pre").forEach(o=>{const e=document.createElement("button");e.innerHTML='<i class="bi bi-clipboard"></i>',e.className="copy-button",e.setAttribute("aria-label","Copia codice"),e.addEventListener("click",async()=>{const c=o.querySelector("code")?.innerText??o.innerText;try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(c);else{const t=document.createElement("textarea");t.value=c,t.style.cssText="position:fixed;opacity:0;pointer-events:none",document.body.appendChild(t),t.select(),document.execCommand("copy"),document.body.removeChild(t)}e.classList.add("copied"),e.setAttribute("aria-label","Copiato!"),setTimeout(()=>{e.classList.remove("copied"),e.setAttribute("aria-label","Copia codice")},2e3)}catch(t){console.error("Errore durante la copia:",t)}});const n=document.createElement("div");n.className="pre-wrapper",o.parentNode&&(o.parentNode.insertBefore(n,o),n.appendChild(o),n.appendChild(e))})});</script>  </main> <!-- ══ FOOTER ══════════════════════════════════════════════════════ --> <footer class="border-top border-secondary-subtle py-5 mt-5"> <div class="container"> <div class="row gy-4 pb-5"> <div class="col-lg-4"> <p class="fw-semibold text-uppercase small mb-3">Pablo Dev</p> <p class="text-secondary small lh-lg mb-4"> Sviluppo Software Web &amp; AI Integration <!-- Freelance Developer &amp; AI Specialist.<br>
+						Sviluppo Web App e integro l'AI nel tuo business. --> </p> <div class="d-flex gap-3"> <a href="https://github.com/pablodevhub" class="text-secondary"><i class="bi bi-github fs-6"></i></a> <a href="https://www.youtube.com/@pablodev-yt" class="text-secondary"><i class="bi bi-youtube fs-6"></i></a>  <a href="mailto:pablodev@outlook.it" class="text-secondary"><i class="bi bi-envelope fs-6"></i></a> </div> </div> <div class="col-6 col-lg-2 offset-lg-4"> <p class="text-uppercase fw-semibold mb-3 small">Navigazione</p> <div class="d-flex flex-column gap-2"> <a href="/" class="text-secondary text-decoration-none small">Home</a> <a href="/blog" class="text-secondary text-decoration-none small">Blog</a>
+						<a href="/progetti" class="text-secondary text-decoration-none small">Progetti</a>  </div> </div> <!-- <div class="col-6 col-lg-2">
+					<p class="text-uppercase fw-semibold mb-3 small">Servizi</p>
+					<div class="d-flex flex-column gap-2">
+					<a href="#" class="text-secondary text-decoration-none small">Siti Vetrina</a>
+					<a href="#" class="text-secondary text-decoration-none small">Web App</a>
+					<a href="#" class="text-secondary text-decoration-none small">Integrazione AI</a>
+					<a href="#" class="text-secondary text-decoration-none small">Consulenza</a>
+					</div>
+				</div> --> <div class="col-6 col-lg-2"> <p class="text-uppercase fw-semibold mb-3 small">Legale</p> <div class="d-flex flex-column gap-2"> <a href="/privacy-policy" class="text-secondary text-decoration-none small">Privacy Policy</a> <a href="/cookie-policy" class="text-secondary text-decoration-none small">Cookie Policy</a> </div> </div> </div> <div class="border-top border-secondary-subtle pt-4 d-flex justify-content-between align-items-center flex-wrap gap-2"> <span class="text-secondary small">&copy; 2026 Pablo. Tutti i diritti riservati.</span> <span class="text-secondary small">P.IVA 10407410967</span> </div> </div> </footer> <!-- <footer class="bg-body-tertiary border-top py-4 mt-5">
+		<div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-body-secondary small">
+		<span>&copy; {new Date().getFullYear()} {SITE_CONFIG.title}. Tutti i diritti riservati.</span>
+		<div class="d-flex gap-3">
+			<a href={`mailto:${SITE_CONFIG.email}`} class="text-body-secondary text-decoration-none">
+				<i class="bi bi-envelope-fill me-1"></i>{SITE_CONFIG.email}
+			</a>
+			<a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noopener noreferrer" class="text-body-secondary text-decoration-none">
+				<i class="bi bi-youtube me-1"></i>YouTube
+			</a>
+		</div>
+		</div>
+	</footer> --> <script src="/scripts/cookie-consent.js" defer></script> <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> --> <script type="module" src="/_astro/BaseLayout.astro_astro_type_script_index_0_lang.GtM1sxkV.js"></script> </body> </html>
