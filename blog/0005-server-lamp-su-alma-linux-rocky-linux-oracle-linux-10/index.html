@@ -77,6 +77,50 @@ sudo dnf install epel-release
 sudo dnf install https://rpms.remirepo.net/enterprise/remi-release-10.rpm
 sudo dnf update
 </code></pre>
+<h3 id="tenere-attiva-istanza-oracle-con-stress-ng">Tenere attiva istanza Oracle con stress ng</h3>
+<p>Le risorse che non vengono utilizzate a sufficienza possono essere ritirate da Oracle. Vedere di più <a href="https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm">a questa pagina</a>.</p>
+<p>Per evitare ciò possiamo usare l’utility <code>stress-ng</code> e schedularla di notte di modo che la nostra istanza continui a funzionare nel tempo. Per prima cosa procediamo a installare l’utility</p>
+<pre><code class="language-sh">sudo dnf install stress-ng
+</code></pre>
+<p>Dopodichè il comando che esegue è il seguente</p>
+<pre><code>stress-ng -c `grep -c ^processor /proc/cpuinfo` -t 5000 -l 22
+</code></pre>
+<p>dove</p>
+<ol>
+<li>-c grep -c ^processor /proc/cpuinfo recupera il numero di CPU</li>
+<li>-t 5000 è il numero di secondi impiegato dal job</li>
+<li>-l 22 indica la percentuale stress</li>
+</ol>
+<p>Per far girare questo applicativo ogni giorno aggiungere ils eguente comando a cronjob</p>
+<pre><code>sudo crontab -e
+
+# strees ng per macchine oracle
+00 05 * * * stress-ng -c `grep -c ^processor /proc/cpuinfo` -t 5000 -l 22
+</code></pre>
+<h3 id="aggiungere-swap">Aggiungere Swap</h3>
+<p>Se con il comando <code>free -h</code> lo spazio di swap è 0 ti consiglio di impostare lo spazio di swap. Per fare ciò crea prima il file di swap e imposta i permessi corretti.</p>
+<pre><code>sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+</code></pre>
+<p>Dopodichè formatta il file come swap, e attiva lo swap</p>
+<pre><code>sudo mkswap /swapfile
+sudo swapon /swapfile
+</code></pre>
+<p>Verifica che vi sia 2GB eseguendo il comando <code>free -h</code>. Per rendere lo swap permanente aggiungi la seguente voce in <code>/etc/fstab</code></p>
+<pre><code>sudo nano /etc/fstab
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+</code></pre>
+<p>Ora settiamo quanto il kernel deve usare lo swap, impostando lo swappiness</p>
+<pre><code># Imposta subito (senza riavvio)
+sudo sysctl vm.swappiness=10
+
+# Rendi permanente
+echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+</code></pre>
+<p>Verifica con il seguente comando, dovrebbe restituire 10</p>
+<pre><code>cat /proc/sys/vm/swappiness
+</code></pre>
 <h3 id="disabilitare-selinux">Disabilitare SELinux</h3>
 <p>SELinux (Security-Enhanced Linux) è un sistema di controllo degli accessi obligtorio. In produzione va gestito correttamente, ma su un server di sviluppo locale crea spesso problemi con Apache, PHP e la lettura delle cartelle condivise.</p>
 <p>Esegui la seguente linea di codice e poi riavvia la macchina</p>
