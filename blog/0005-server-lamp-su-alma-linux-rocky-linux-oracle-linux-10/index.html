@@ -97,8 +97,23 @@ sudo dnf update
 # strees ng per macchine oracle
 00 05 * * * stress-ng -c `grep -c ^processor /proc/cpuinfo` -t 5000 -l 22
 </code></pre>
+<h3 id="aprire-porte-80-e-443-per-macchina-oracle-linux">Aprire porte 80 e 443 per macchina oracle linux</h3>
+<p>Se usi una macchina virtuale “always free” creata su oracle linux assicurati di avere le porte 443 e 80 apert. Per fare ciò segui questi screenshot.</p>
+<ol>
+<li>Entra dentro la sezione “Networking” della macchina. Nella sezione “Attached VNICs” clicca sul link che porta alla tua subnet</li>
+</ol>
+<p><img src="/images/blog/subnetoracle.webp" alt="subnet oracle"></p>
+<ol start="2">
+<li>Vai nel tab “Security” e infine clicca sulla riga relativa alla security list</li>
+</ol>
+<p><img src="/images/blog/oracle-securitylist.webp" alt="oracle security list"></p>
+<ol start="3">
+<li>Naviga nel tab “Security rules” e infine aggiungi le regole per le porte 80 e 443 se non esistono</li>
+</ol>
+<p><img src="/images/blog/oracle-securityrules.webp" alt="oracle security list">
+<img src="/images/blog/oracle-open-port-80.webp" alt="oracle open http port"></p>
 <h3 id="aggiungere-swap">Aggiungere Swap</h3>
-<p>Se con il comando <code>free -h</code> lo spazio di swap è 0 ti consiglio di impostare lo spazio di swap. Per fare ciò crea prima il file di swap e imposta i permessi corretti.</p>
+<p>Se con il comando <code>free -h</code> oppure <code>swapon --show</code> lo spazio di swap è 0 ti consiglio di impostare lo spazio di swap. Per fare ciò crea prima il file di swap e imposta i permessi corretti.</p>
 <pre><code>sudo fallocate -l 2G /swapfile
 sudo chmod 600 /swapfile
 </code></pre>
@@ -254,7 +269,7 @@ sudo dnf group list
 sudo dnf group install 'Development Tools' -y
 </code></pre>
 <h2 id="ssh-con-autenticazione-a-chiave">SSH con autenticazione a chiave</h2>
-<h3 id="macchian-remota-cloud">Macchian remota cloud</h3>
+<h3 id="macchina-remota-cloud">Macchina remota cloud</h3>
 <p>L’autenticazione con chiave SSH è più sicura della password. Generi una coppia di chiavi sul tuo PC, copi la chiave pubblica sul server, e da quel momento ti connetti senza digitare la password.</p>
 <p>Genera la coppia di chiavi (sul tuo PC)</p>
 <pre><code># Sul tuo computer locale (Windows PowerShell / macOS / Linux)
