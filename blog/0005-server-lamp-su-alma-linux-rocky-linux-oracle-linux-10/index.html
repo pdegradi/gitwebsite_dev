@@ -77,65 +77,6 @@ sudo dnf install epel-release
 sudo dnf install https://rpms.remirepo.net/enterprise/remi-release-10.rpm
 sudo dnf update
 </code></pre>
-<h3 id="tenere-attiva-istanza-oracle-con-stress-ng">Tenere attiva istanza Oracle con stress ng</h3>
-<p>Le risorse che non vengono utilizzate a sufficienza possono essere ritirate da Oracle. Vedere di più <a href="https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm">a questa pagina</a>.</p>
-<p>Per evitare ciò possiamo usare l’utility <code>stress-ng</code> e schedularla di notte di modo che la nostra istanza continui a funzionare nel tempo. Per prima cosa procediamo a installare l’utility</p>
-<pre><code class="language-sh">sudo dnf install stress-ng
-</code></pre>
-<p>Dopodichè il comando che esegue è il seguente</p>
-<pre><code>stress-ng -c `grep -c ^processor /proc/cpuinfo` -t 5000 -l 22
-</code></pre>
-<p>dove</p>
-<ol>
-<li>-c grep -c ^processor /proc/cpuinfo recupera il numero di CPU</li>
-<li>-t 5000 è il numero di secondi impiegato dal job</li>
-<li>-l 22 indica la percentuale stress</li>
-</ol>
-<p>Per far girare questo applicativo ogni giorno aggiungere ils eguente comando a cronjob</p>
-<pre><code>sudo crontab -e
-
-# strees ng per macchine oracle
-00 05 * * * stress-ng -c `grep -c ^processor /proc/cpuinfo` -t 5000 -l 22
-</code></pre>
-<h3 id="aprire-porte-80-e-443-per-macchina-oracle-linux">Aprire porte 80 e 443 per macchina oracle linux</h3>
-<p>Se usi una macchina virtuale “always free” creata su oracle linux assicurati di avere le porte 443 e 80 apert. Per fare ciò segui questi screenshot.</p>
-<ol>
-<li>Entra dentro la sezione “Networking” della macchina. Nella sezione “Attached VNICs” clicca sul link che porta alla tua subnet</li>
-</ol>
-<p><img src="/images/blog/subnetoracle.webp" alt="subnet oracle"></p>
-<ol start="2">
-<li>Vai nel tab “Security” e infine clicca sulla riga relativa alla security list</li>
-</ol>
-<p><img src="/images/blog/oracle-securitylist.webp" alt="oracle security list"></p>
-<ol start="3">
-<li>Naviga nel tab “Security rules” e infine aggiungi le regole per le porte 80 e 443 se non esistono</li>
-</ol>
-<p><img src="/images/blog/oracle-securityrules.webp" alt="oracle security list">
-<img src="/images/blog/oracle-open-port-80.webp" alt="oracle open http port"></p>
-<h3 id="aggiungere-swap">Aggiungere Swap</h3>
-<p>Se con il comando <code>free -h</code> oppure <code>swapon --show</code> lo spazio di swap è 0 ti consiglio di impostare lo spazio di swap. Per fare ciò crea prima il file di swap e imposta i permessi corretti.</p>
-<pre><code>sudo fallocate -l 2G /swapfile
-sudo chmod 600 /swapfile
-</code></pre>
-<p>Dopodichè formatta il file come swap, e attiva lo swap</p>
-<pre><code>sudo mkswap /swapfile
-sudo swapon /swapfile
-</code></pre>
-<p>Verifica che vi sia 2GB eseguendo il comando <code>free -h</code>. Per rendere lo swap permanente aggiungi la seguente voce in <code>/etc/fstab</code></p>
-<pre><code>sudo nano /etc/fstab
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-</code></pre>
-<p>Ora settiamo quanto il kernel deve usare lo swap, impostando lo swappiness</p>
-<pre><code># Imposta subito (senza riavvio)
-sudo sysctl vm.swappiness=10
-
-# Rendi permanente
-echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
-sudo sysctl -p
-</code></pre>
-<p>Verifica con il seguente comando, dovrebbe restituire 10</p>
-<pre><code>cat /proc/sys/vm/swappiness
-</code></pre>
 <h3 id="disabilitare-selinux">Disabilitare SELinux</h3>
 <p>SELinux (Security-Enhanced Linux) è un sistema di controllo degli accessi obligtorio. In produzione va gestito correttamente, ma su un server di sviluppo locale crea spesso problemi con Apache, PHP e la lettura delle cartelle condivise.</p>
 <p>Esegui la seguente linea di codice e poi riavvia la macchina</p>
@@ -173,6 +114,66 @@ sudo dnf remove libreoffice*
 # pulizia dei pacchetti residui
 sudo dnf autoremove
 sudo dnf clean all
+</code></pre>
+<h2 id="macchina-oracle-cloud-always-free">Macchina Oracle cloud “Always free”</h2>
+<p>Tutorial utile a <a href="https://docs.oracle.com/en-us/iaas/Content/developer/apache-on-oracle-linux/01-summary.htm">questa pagina</a></p>
+<h3 id="tenere-attiva-istanza-oracle-con-stress-ng">Tenere attiva istanza Oracle con stress ng</h3>
+<p>Le risorse che non vengono utilizzate a sufficienza possono essere ritirate da Oracle. Vedere di più <a href="https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm">a questa pagina</a>.</p>
+<p>Per evitare ciò possiamo usare l’utility <code>stress-ng</code> e schedularla di notte di modo che la nostra istanza continui a funzionare nel tempo. Per prima cosa procediamo a installare l’utility</p>
+<pre><code class="language-sh">sudo dnf install stress-ng
+</code></pre>
+<p>Dopodichè il comando che esegue è il seguente</p>
+<pre><code>stress-ng -c `grep -c ^processor /proc/cpuinfo` -t 5000 -l 22
+</code></pre>
+<p>dove</p>
+<ol>
+<li>-c grep -c ^processor /proc/cpuinfo recupera il numero di CPU</li>
+<li>-t 5000 è il numero di secondi impiegato dal job, poco meno di 1h e mezza</li>
+<li>-l 22 indica la percentuale stress</li>
+</ol>
+<p>Per far girare questo applicativo ogni giorno aggiungere ils eguente comando a cronjob</p>
+<pre><code>sudo crontab -e
+
+# strees ng per macchine oracle
+00 05 * * * stress-ng -c `grep -c ^processor /proc/cpuinfo` -t 5000 -l 22
+</code></pre>
+<h3 id="aprire-porte-80-e-443-per-macchina-oracle-linux">Aprire porte 80 e 443 per macchina oracle linux</h3>
+<p>Se usi una macchina virtuale “always free” creata su oracle linux assicurati di avere le porte 443 e 80 apert. Per fare ciò segui questi screenshot.</p>
+<ol>
+<li>Entra dentro la sezione “Networking” della macchina. Nella sezione “Attached VNICs” clicca sul link che porta alla tua subnet</li>
+</ol>
+<p><img src="/images/blog/subnetoracle.webp" alt="subnet oracle"></p>
+<ol start="2">
+<li>Vai nel tab “Security” e infine clicca sulla riga relativa alla security list</li>
+</ol>
+<p><img src="/images/blog/oracle-securitylist.webp" alt="oracle security list"></p>
+<ol start="3">
+<li>Naviga nel tab “Security rules” e infine aggiungi le regole per le porte 80 e 443 se non esistono</li>
+</ol>
+<p><img src="/images/blog/oracle-securityrules.webp" alt="oracle security list">
+<img src="/images/blog/oracle-open-port-80.webp" alt="oracle open http port"></p>
+<h3 id="aggiungere-swap">Aggiungere Swap</h3>
+<p>Se con il comando <code>free -h</code> oppure <code>swapon --show</code> lo spazio di swap è 0 ti consiglio di impostare lo spazio di swap. Per fare ciò crea prima il file di swap e imposta i permessi corretti.</p>
+<pre><code>sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+</code></pre>
+<p>Dopodichè formatta il file come swap, e attiva lo swap</p>
+<pre><code>sudo mkswap /swapfile
+sudo swapon /swapfile
+</code></pre>
+<p>Verifica che vi sia 2GB eseguendo il comando <code>free -h</code>. Per rendere lo swap permanente aggiungi la seguente voce in <code>/etc/fstab</code></p>
+<pre><code>echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+</code></pre>
+<p>Ora settiamo quanto il kernel deve usare lo swap, impostando lo swappiness</p>
+<pre><code># Imposta subito (senza riavvio)
+sudo sysctl vm.swappiness=10
+
+# Rendi permanente
+echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+</code></pre>
+<p>Verifica con il seguente comando, dovrebbe restituire 10</p>
+<pre><code>cat /proc/sys/vm/swappiness
 </code></pre>
 <h2 id="firewall-firewalld">Firewall (firewalld)</h2>
 <p>Oracle Linux 10 usa firewalld come frontend per iptables. Il concetto base è quello delle zone: ogni interfaccia di rete viene assegnata a una zona con regole specifiche. La zona di default è public</p>
@@ -484,6 +485,9 @@ sudo firewall-cmd --reload
 <p>La root di Apache sarà <code>/var/www</code>. Quando accedi a localhost la root è <code>/var/www/html</code></p>
 <p>Modifica il file di configurazione principale:</p>
 <pre><code>sudo nano /etc/httpd/conf/httpd.conf
+
+# Cerca la riga #ServerName www.example.com:80 e sostituiscila con:
+ServerName localhost
 
 # assicurati che ci sia "AllowOverride All" 
 &#x3C;Directory "/var/www/html">
