@@ -946,6 +946,56 @@ sudo certbot revoke --cert-path /etc/letsencrypt/live/miosito.com/fullchain.pem
 # Dopo la cancellazione, rimuovere il virtual host HTTPS se non più necessario
 sudo rm /etc/httpd/conf.d/miosito-ssl.conf
 sudo systemctl reload httpd
+</code></pre>
+<h2 id="basic-auth-apache">Basic Auth Apache</h2>
+<p>Crea il file delle password</p>
+<pre><code># Crea la directory per i file di auth (fuori dal webroot)
+sudo mkdir -p /etc/httpd/auth
+
+# Crea il primo utente (-c crea il file, usalo solo la prima volta)
+sudo htpasswd -c /etc/httpd/auth/pma.htpasswd nomeutente
+
+# Per aggiungere altri utenti (senza -c, altrimenti sovrascrive)
+sudo htpasswd /etc/httpd/auth/pma.htpasswd altrouser
+</code></pre>
+<p>Poi modifica il file conf ssl di apache, aggiungendo la direttiva <code>&#x3C;Location></code></p>
+<pre><code>&#x3C;IfModule mod_ssl.c>
+&#x3C;VirtualHost *:443>
+    ServerName ....
+    DocumentRoot ....
+
+    &#x3C;Directory ....>
+        ....
+    &#x3C;/Directory>
+
+    # Basic Auth tramite Location (ha precedenza su .htaccess)
+    &#x3C;Location "/">
+        AuthType Basic
+        AuthName "Area Riservata"
+        AuthUserFile /etc/httpd/auth/pma.htpasswd
+        Require valid-user
+    &#x3C;/Location>
+
+    ErrorLog ....
+    CustomLog ....
+
+    SSLCertificateFile ....
+    SSLCertificateKeyFile ....
+    Include ....
+&#x3C;/VirtualHost>
+&#x3C;/IfModule>
+</code></pre>
+<p>Il file conf relativo alla porta <code>:80</code> non serve modificarlo perché fa già redirect a HTTPS.</p>
+<p>Aggiusta i permessi sul file htpasswd</p>
+<pre><code>sudo chown root:apache /etc/httpd/auth/pma.htpasswd
+sudo chmod 640 /etc/httpd/auth/pma.htpasswd
+</code></pre>
+<p>Verifica la configurazione e riavvia Apache</p>
+<pre><code># Controlla che non ci siano errori di sintassi
+sudo apachectl configtest
+
+# Riavvia Apache
+sudo systemctl restart httpd
 </code></pre> </div> </div> </div> </article> <script type="module">const a=document.getElementById("article-content"),d=document.getElementById("toc-list"),r=document.getElementById("toc-container");if(a&&d&&r){const o=a.querySelectorAll("h2");o.length===0?r.style.display="none":o.forEach((e,n)=>{e.id||(e.id=`section-${n+1}`);const c=document.createElement("li"),t=document.createElement("a");t.href=`#${e.id}`,t.textContent=e.textContent??"",t.className="text-body-secondary",t.addEventListener("click",l=>{l.preventDefault();const i=document.getElementById(e.id);if(i){const s=i.getBoundingClientRect().top+window.scrollY-80;window.scrollTo({top:s,behavior:"smooth"})}}),c.appendChild(t),d.appendChild(c)})}document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll("pre").forEach(o=>{const e=document.createElement("button");e.innerHTML='<i class="bi bi-clipboard"></i>',e.className="copy-button",e.setAttribute("aria-label","Copia codice"),e.addEventListener("click",async()=>{const c=o.querySelector("code")?.innerText??o.innerText;try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(c);else{const t=document.createElement("textarea");t.value=c,t.style.cssText="position:fixed;opacity:0;pointer-events:none",document.body.appendChild(t),t.select(),document.execCommand("copy"),document.body.removeChild(t)}e.classList.add("copied"),e.setAttribute("aria-label","Copiato!"),setTimeout(()=>{e.classList.remove("copied"),e.setAttribute("aria-label","Copia codice")},2e3)}catch(t){console.error("Errore durante la copia:",t)}});const n=document.createElement("div");n.className="pre-wrapper",o.parentNode&&(o.parentNode.insertBefore(n,o),n.appendChild(o),n.appendChild(e))})});</script>  </main> <!-- ══ FOOTER ══════════════════════════════════════════════════════ --> <footer class="border-top border-secondary-subtle py-5 mt-5"> <div class="container"> <div class="row gy-4 pb-5"> <div class="col-lg-4"> <p class="fw-semibold text-uppercase small mb-3">Pablo Dev</p> <p class="text-secondary small lh-lg mb-4"> Sviluppo Software Web &amp; AI Integration <!-- Freelance Developer &amp; AI Specialist.<br>
 						Sviluppo Web App e integro l'AI nel tuo business. --> </p> <div class="d-flex gap-3"> <a href="https://github.com/pablodevhub" class="text-secondary"><i class="bi bi-github fs-6"></i></a> <a href="https://www.youtube.com/@pablodev-yt" class="text-secondary"><i class="bi bi-youtube fs-6"></i></a>  <a href="mailto:pablodev@outlook.it" class="text-secondary"><i class="bi bi-envelope fs-6"></i></a> </div> </div> <div class="col-6 col-lg-2 offset-lg-4"> <p class="text-uppercase fw-semibold mb-3 small">Navigazione</p> <div class="d-flex flex-column gap-2"> <a href="/" class="text-secondary text-decoration-none small">Home</a> <a href="/blog" class="text-secondary text-decoration-none small">Blog</a>
 						<a href="/progetti" class="text-secondary text-decoration-none small">Progetti</a>  </div> </div> <!-- <div class="col-6 col-lg-2">
