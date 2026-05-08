@@ -498,7 +498,7 @@ ServerName localhost
 <pre><code>sudo nano /etc/httpd/conf.d/000-default.conf
 
 &#x3C;VirtualHost *:$APACHE_PORT>
-	ServerAdmin webmaster@localhost
+	ServerName ......
 	DocumentRoot /var/www/html
   
 	&#x3C;Directory "/var/www/html">
@@ -510,6 +510,9 @@ ServerName localhost
 	ErrorLog /var/log/httpd/error.log
 	CustomLog /var/log/httpd/access.log combined
 &#x3C;/VirtualHost>
+</code></pre>
+<p>Disabilita il conf <code>welcome.conf</code></p>
+<pre><code>sudo mv /etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/welcome.conf.old
 </code></pre>
 <p>Riavvia Apache e controlla lo status</p>
 <pre><code>sudo systemctl restart httpd
@@ -523,7 +526,7 @@ sudo systemctl status httpd
     DocumentRoot /var/www/miosito
 
     &#x3C;Directory /var/www/miosito>
-        Options FollowSymLinks
+        Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
     &#x3C;/Directory>
