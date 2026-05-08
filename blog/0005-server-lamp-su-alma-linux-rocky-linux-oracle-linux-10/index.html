@@ -363,7 +363,7 @@ ssh-keygen -t ed25519 -C 'mario@esempio.it' -f ~/.ssh/id_github
 ssh-keygen -t ed25519 -C 'mario@esempio.it' -f ~/.ssh/id_bitbucket
 
 # Aggiungere le chiavi all'agente SSH
-eval '$(ssh-agent -s)'
+eval '$(ssh-agent -s)'     oppure     eval "$(ssh-agent)"
 ssh-add ~/.ssh/id_github
 ssh-add ~/.ssh/id_bitbucket
 
