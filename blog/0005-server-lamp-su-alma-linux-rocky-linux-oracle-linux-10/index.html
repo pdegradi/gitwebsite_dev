@@ -9,7 +9,7 @@
 </a> </li>  </ul> </div> </div> </nav> <main>  <article class="container py-5"> <div class="mb-4"> <a href="/blog" class="btn btn-outline-secondary btn-sm"> <i class="bi bi-arrow-left me-1"></i>Tutti gli articoli
 </a> </div> <h1 class="mb-2 text-center">Server Lamp su Alma Linux, Rocky Linux, Oracle Linux 10</h1> <p class="text-body-secondary mb-4 text-center"> <i class="bi bi-calendar3 me-1"></i> <time datetime="2026-01-05">5 gennaio 2026</time> </p> <div class="row justify-content-center"> <div class="col-lg-8"> <img src="/images/blog/lamprhel.webp" alt="lamp rhel" class="article-cover rounded mb-4"> <nav id="toc-container" class="card bg-body-tertiary border mt-4 mb-5 p-3" aria-label="Indice dei contenuti"> <h2 class="h4 text-uppercase text-body-secondary mb-3"> <i class="bi bi-list-ul me-1"></i> Indice
 </h2> <ul class="toc-list" id="toc-list"></ul> </nav> <div id="article-content"> <h2 id="comandi-di-base-e-configurazione-iniziale">Comandi di base e configurazione iniziale</h2>
-<p>Questa guida assume che Linux (AlmaLinux, RockyLinux, oppure Oracle Linux 10) sia disponibile come macchina remota (attraverso servizi come digital oceans, oppure aruba cloud) oppure che firi come macchina virtuale (VMware).</p>
+<p>Questa guida assume che Linux (AlmaLinux, RockyLinux, oppure <a href="https://docs.oracle.com/en/operating-systems/oracle-linux/10/">Oracle Linux 10</a>) sia disponibile come macchina remota (attraverso servizi come digital oceans, oppure aruba cloud) oppure che firi come macchina virtuale (VMware).</p>
 <p>Nel caso di una macchina locale la modalità di rete utilizzata è <strong>NAT</strong>, con macchina host Windows 11.</p>
 <p>La guida è compatibile anche se usi linux su Virtualbox, l’unica differenza è come fare i port forwarding</p>
 <h3 id="port-forwarding">Port Forwarding</h3>
@@ -202,6 +202,10 @@ sudo firewall-cmd --reload
 
 # Verificare
 sudo firewall-cmd --list-services
+</code></pre>
+<p>Abilitare RDP</p>
+<pre><code>sudo firewall-cmd --permanent --add-port=3389/tcp    
+sudo firewall-cmd --reload
 </code></pre>
 <p>Aprire porte singole</p>
 <pre><code># Aprire la porta 3389 (TCP)

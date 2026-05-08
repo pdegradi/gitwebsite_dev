@@ -1,0 +1,89 @@
+<!DOCTYPE html><html lang="it" data-bs-theme="dark"> <head><!-- 
+		preconnect Ottimizza le connessioni esterne 
+		I file di Bootstrap vengono caricati da cdn.jsdelivr.net. Il browser perde tempo a "cercare" dove si trova questo server (DNS lookup) e a stabilire una connessione sicura.
+		Soluzione: Aggiungi queste due righe in cima al tuo <head>, prima di ogni altra cosa: 
+	--><link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v6.1.3"><title>Compilare Python da sorgente su Linux: guida per RHEL e Debian/Ubuntu | Pablo Dev</title><meta name="description" content="Scopri come compilare Python da sorgente su distribuzioni Linux RHEL (AlmaLinux, Rocky, Oracle) e Debian/Ubuntu. Guida pratica passo dopo passo per installare qualsiasi versione in una directory personalizzata"><link rel="canonical" href="https://pablodev.pubcloud.net/blog/0009-compilare-python-da-sorgente-linux/"><meta property="og:title" content="Compilare Python da sorgente su Linux: guida per RHEL e Debian/Ubuntu | Pablo Dev"><meta property="og:description" content="Scopri come compilare Python da sorgente su distribuzioni Linux RHEL (AlmaLinux, Rocky, Oracle) e Debian/Ubuntu. Guida pratica passo dopo passo per installare qualsiasi versione in una directory personalizzata"><meta property="og:url" content="https://pablodev.pubcloud.net/blog/0009-compilare-python-da-sorgente-linux/"><meta property="og:type" content="article"><meta property="og:site_name" content="Pablo Dev"><meta property="og:image" content="https://pablodev.pubcloud.net/images/blog/python-snake-logo.webp"><meta property="article:published_time" content="2026-05-08"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Compilare Python da sorgente su Linux: guida per RHEL e Debian/Ubuntu | Pablo Dev"><meta name="twitter:description" content="Scopri come compilare Python da sorgente su distribuzioni Linux RHEL (AlmaLinux, Rocky, Oracle) e Debian/Ubuntu. Guida pratica passo dopo passo per installare qualsiasi versione in una directory personalizzata"><meta name="twitter:image" content="https://pablodev.pubcloud.net/images/blog/python-snake-logo.webp"><meta name="google-site-verification" content="BxY2GMt1bMEuHSSFjgpTSqk-jNTcWCi_QyK-K0W6ncU">
+		<meta name="msvalidate.01" content="459786BEF673C99279D8774CC75C50E0"><link rel="sitemap" href="/sitemap-index.xml"><link rel="icon" href="data:,"><!-- blank favicon --><!-- Bootstrap Icons --><link rel="stylesheet" href="/vendors/bootstrap-icons-1.13.1/bootstrap-icons.min.css"><!-- stili nel file main.scss importati come ultimi --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","name":"Pablo Dev","url":"https://pablodev.pubcloud.net","description":"Sviluppo Software Web & AI Integration","datePublished":"2026-05-08","author":{"@type":"Person","name":"Pablo"}}</script><link rel="stylesheet" href="/_astro/BaseLayout.CFw3ldGN.css"></head> <body> <nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary border-bottom"> <div class="container"> <a class="navbar-brand fw-bold" href="/">Pablo Dev</a> <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button> <div class="collapse navbar-collapse" id="navbarNav"> <ul class="navbar-nav ms-auto gap-2"> <li class="nav-item"> <a class="nav-link" href="/">Home</a> </li> <li class="nav-item"><a class="nav-link" href="/blog">Blog</a></li>
+						<li class="nav-item"><a class="nav-link" href="/progetti">Progetti</a></li>
+						<li class="nav-item"> <a class="nav-link" href="https://www.youtube.com/@pablodev-yt" target="_blank" rel="noopener noreferrer"> <i class="bi bi-youtube me-1"></i>YouTube
+</a> </li>  </ul> </div> </div> </nav> <main>  <article class="container py-5"> <div class="mb-4"> <a href="/blog" class="btn btn-outline-secondary btn-sm"> <i class="bi bi-arrow-left me-1"></i>Tutti gli articoli
+</a> </div> <h1 class="mb-2 text-center">Compilare Python da sorgente su Linux: guida per RHEL e Debian/Ubuntu</h1> <p class="text-body-secondary mb-4 text-center"> <i class="bi bi-calendar3 me-1"></i> <time datetime="2026-05-08">8 maggio 2026</time> </p> <div class="row justify-content-center"> <div class="col-lg-8"> <img src="/images/blog/python-snake-logo.webp" alt="python snake logo" class="article-cover rounded mb-4"> <nav id="toc-container" class="card bg-body-tertiary border mt-4 mb-5 p-3" aria-label="Indice dei contenuti"> <h2 class="h4 text-uppercase text-body-secondary mb-3"> <i class="bi bi-list-ul me-1"></i> Indice
+</h2> <ul class="toc-list" id="toc-list"></ul> </nav> <div id="article-content"> <p>Questa guida mostra come compilare Python da sorgente su distribuzioni Linux basate su RHEL (Oracle Linux, AlmaLinux, Rocky Linux) e su Debian/Ubuntu. Compilare da sorgente permette di scegliere esattamente la versione da installare, in una directory personalizzata, senza interferire con il Python di sistema.</p>
+<h2 id="1-installa-le-dipendenze-di-compilazione">1. Installa le dipendenze di compilazione</h2>
+<p>Per RHEL (Oracle Linux 10, AlmaLinux 10, Rocky Linux 10) usa questi comandi</p>
+<pre><code class="language-bash">sudo dnf groupinstall "Development Tools"
+sudo dnf install zlib-devel ncurses-devel gdbm-devel openssl-devel readline-devel libffi-devel sqlite-devel bzip2-devel xz-devel tk-devel uuid-devel libuuid-devel
+</code></pre>
+<p>Per Debian 13 / Ubuntu 26 usa qesti comandi</p>
+<pre><code class="language-bash">sudo apt update
+sudo apt install -y build-essential libz-dev libncurses-dev libgdbm-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev libbz2-dev liblzma-dev tk-dev uuid-dev
+</code></pre>
+<h2 id="2-scarica-e-compila-i-sorgenti">2. Scarica e compila i sorgenti</h2>
+<p>Setta la variabile <code>PYTHON_VERSION</code> per impostare la versione da installare, la variabile <code>PYTHON_INSTALL_DIR</code> per settare la cartella che conterrà python compilato</p>
+<pre><code class="language-bash"># Imposta la versione e la directory di installazione
+export PYTHON_VERSION="3.14.4"
+export PYTHON_INSTALL_DIR="$HOME/PROGS/python${PYTHON_VERSION}"
+
+# Prepara le directory
+sudo rm -rf "${PYTHON_INSTALL_DIR}" &#x26;&#x26; mkdir -p "${PYTHON_INSTALL_DIR}"
+mkdir -p ~/sources &#x26;&#x26; cd ~/sources
+
+# Scarica ed estrai i sorgenti
+wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz
+tar -xf Python-${PYTHON_VERSION}.tar.xz
+rm Python-${PYTHON_VERSION}.tar.xz
+cd Python-${PYTHON_VERSION}
+
+# Configura
+./configure --prefix="${PYTHON_INSTALL_DIR}" --enable-optimizations --with-ensurepip=install
+
+# Compila e installa
+make -j $(nproc)
+make install
+</code></pre>
+<h2 id="3-aggiorna-il-path">3. Aggiorna il PATH</h2>
+<p>Apri in modifica il file <code>~/.bashrc</code> e aggiungi le seguenti righe, ricordando di impostare correttamente le variabili <code>PYTHON_VERSION</code> e <code>PYTHON_INSTALL_DIR</code></p>
+<pre><code class="language-bash">nano ~/.bashrc
+
+export PYTHON_VERSION="3.14.4"
+export PYTHON_INSTALL_DIR="$HOME/PROGS/python${PYTHON_VERSION}"
+export PATH="${PYTHON_INSTALL_DIR}/bin:$PATH"
+</code></pre>
+<p>Poi ricarica il file:</p>
+<pre><code class="language-bash">source ~/.bashrc
+</code></pre>
+<h2 id="4-verifica-linstallazione">4. Verifica l’installazione</h2>
+<pre><code class="language-bash">$PYTHON_INSTALL_DIR/bin/python3 --version
+$PYTHON_INSTALL_DIR/bin/pip3 --version
+</code></pre>
+<h2 id="5-pulizia">5. Pulizia</h2>
+<pre><code class="language-bash">cd $HOME &#x26;&#x26; rm -rf ~/sources
+</code></pre>
+<h2 id="note-finali">Note finali</h2>
+<ul>
+<li>Cambia il valore di <code>PYTHON_VERSION</code> per compilare qualsiasi altra versione.</li>
+<li>L’opzione <code>--enable-optimizations</code> attiva le ottimizzazioni PGO (Profile Guided Optimization): allunga i tempi di compilazione ma migliora le prestazioni a runtime.</li>
+<li>L’installazione avviene in una directory utente (<code>$HOME/PROGS/...</code>), senza toccare il Python di sistema.</li>
+</ul> </div> </div> </div> </article> <script type="module">const a=document.getElementById("article-content"),d=document.getElementById("toc-list"),r=document.getElementById("toc-container");if(a&&d&&r){const o=a.querySelectorAll("h2");o.length===0?r.style.display="none":o.forEach((e,n)=>{e.id||(e.id=`section-${n+1}`);const c=document.createElement("li"),t=document.createElement("a");t.href=`#${e.id}`,t.textContent=e.textContent??"",t.className="text-body-secondary",t.addEventListener("click",l=>{l.preventDefault();const i=document.getElementById(e.id);if(i){const s=i.getBoundingClientRect().top+window.scrollY-80;window.scrollTo({top:s,behavior:"smooth"})}}),c.appendChild(t),d.appendChild(c)})}document.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll("pre").forEach(o=>{const e=document.createElement("button");e.innerHTML='<i class="bi bi-clipboard"></i>',e.className="copy-button",e.setAttribute("aria-label","Copia codice"),e.addEventListener("click",async()=>{const c=o.querySelector("code")?.innerText??o.innerText;try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(c);else{const t=document.createElement("textarea");t.value=c,t.style.cssText="position:fixed;opacity:0;pointer-events:none",document.body.appendChild(t),t.select(),document.execCommand("copy"),document.body.removeChild(t)}e.classList.add("copied"),e.setAttribute("aria-label","Copiato!"),setTimeout(()=>{e.classList.remove("copied"),e.setAttribute("aria-label","Copia codice")},2e3)}catch(t){console.error("Errore durante la copia:",t)}});const n=document.createElement("div");n.className="pre-wrapper",o.parentNode&&(o.parentNode.insertBefore(n,o),n.appendChild(o),n.appendChild(e))})});</script>  </main> <!-- ══ FOOTER ══════════════════════════════════════════════════════ --> <footer class="border-top border-secondary-subtle py-5 mt-5"> <div class="container"> <div class="row gy-4 pb-5"> <div class="col-lg-4"> <p class="fw-semibold text-uppercase small mb-3">Pablo Dev</p> <p class="text-secondary small lh-lg mb-4"> Sviluppo Software Web &amp; AI Integration <!-- Freelance Developer &amp; AI Specialist.<br>
+						Sviluppo Web App e integro l'AI nel tuo business. --> </p> <div class="d-flex gap-3"> <a href="https://github.com/pablodevhub" class="text-secondary"><i class="bi bi-github fs-6"></i></a> <a href="https://www.youtube.com/@pablodev-yt" class="text-secondary"><i class="bi bi-youtube fs-6"></i></a>  <a href="mailto:pablodev@outlook.it" class="text-secondary"><i class="bi bi-envelope fs-6"></i></a> </div> </div> <div class="col-6 col-lg-2 offset-lg-4"> <p class="text-uppercase fw-semibold mb-3 small">Navigazione</p> <div class="d-flex flex-column gap-2"> <a href="/" class="text-secondary text-decoration-none small">Home</a> <a href="/blog" class="text-secondary text-decoration-none small">Blog</a>
+						<a href="/progetti" class="text-secondary text-decoration-none small">Progetti</a>  </div> </div> <!-- <div class="col-6 col-lg-2">
+					<p class="text-uppercase fw-semibold mb-3 small">Servizi</p>
+					<div class="d-flex flex-column gap-2">
+					<a href="#" class="text-secondary text-decoration-none small">Siti Vetrina</a>
+					<a href="#" class="text-secondary text-decoration-none small">Web App</a>
+					<a href="#" class="text-secondary text-decoration-none small">Integrazione AI</a>
+					<a href="#" class="text-secondary text-decoration-none small">Consulenza</a>
+					</div>
+				</div> --> <div class="col-6 col-lg-2"> <p class="text-uppercase fw-semibold mb-3 small">Legale</p> <div class="d-flex flex-column gap-2"> <a href="/privacy-policy" class="text-secondary text-decoration-none small">Privacy Policy</a> <a href="/cookie-policy" class="text-secondary text-decoration-none small">Cookie Policy</a> </div> </div> </div> <div class="border-top border-secondary-subtle pt-4 d-flex justify-content-between align-items-center flex-wrap gap-2"> <span class="text-secondary small">&copy; 2026 Pablo. Tutti i diritti riservati.</span> <span class="text-secondary small">P.IVA 10407410967</span> </div> </div> </footer> <!-- <footer class="bg-body-tertiary border-top py-4 mt-5">
+		<div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-body-secondary small">
+		<span>&copy; {new Date().getFullYear()} {SITE_CONFIG.title}. Tutti i diritti riservati.</span>
+		<div class="d-flex gap-3">
+			<a href={`mailto:${SITE_CONFIG.email}`} class="text-body-secondary text-decoration-none">
+				<i class="bi bi-envelope-fill me-1"></i>{SITE_CONFIG.email}
+			</a>
+			<a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noopener noreferrer" class="text-body-secondary text-decoration-none">
+				<i class="bi bi-youtube me-1"></i>YouTube
+			</a>
+		</div>
+		</div>
+	</footer> --> <script src="/scripts/cookie-consent.js" defer></script> <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> --> <script type="module" src="/_astro/BaseLayout.astro_astro_type_script_index_0_lang.GtM1sxkV.js"></script> </body> </html>
