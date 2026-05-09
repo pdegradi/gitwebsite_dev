@@ -178,7 +178,7 @@ sudo sysctl -p
 <h2 id="firewall-firewalld">Firewall (firewalld)</h2>
 <p>Oracle Linux 10 usa firewalld come frontend per iptables. Il concetto base è quello delle zone: ogni interfaccia di rete viene assegnata a una zona con regole specifiche. La zona di default è public</p>
 <p>Comandi base</p>
-<pre><code># Stato del firewall
+<pre><code class="language-bash"># Stato del firewall
 sudo systemctl status firewalld
 sudo firewall-cmd --state
 
@@ -193,7 +193,7 @@ sudo firewall-cmd --get-zones
 sudo firewall-cmd --get-active-zones
 </code></pre>
 <p>Abilitare servizi http e https</p>
-<pre><code># Aggiungere http e https (permanente)
+<pre><code class="language-bash"># Aggiungere http e https (permanente)
 sudo firewall-cmd --permanent --add-service=http
 sudo firewall-cmd --permanent --add-service=https
 
@@ -204,11 +204,11 @@ sudo firewall-cmd --reload
 sudo firewall-cmd --list-services
 </code></pre>
 <p>Abilitare RDP</p>
-<pre><code>sudo firewall-cmd --permanent --add-port=3389/tcp    
+<pre><code class="language-bash">sudo firewall-cmd --permanent --add-port=3389/tcp    
 sudo firewall-cmd --reload
 </code></pre>
 <p>Aprire porte singole</p>
-<pre><code># Aprire la porta 3389 (TCP)
+<pre><code class="language-bash"># Aprire la porta 3389 (TCP)
 sudo firewall-cmd --permanent --add-port=3389/tcp
 
 # Aprire una porta custom, es. 8080
@@ -224,7 +224,7 @@ sudo firewall-cmd --reload
 sudo firewall-cmd --list-ports
 </code></pre>
 <p>Rimuovere regole</p>
-<pre><code># Rimuovere un servizio
+<pre><code class="language-bash"># Rimuovere un servizio
 sudo firewall-cmd --permanent --remove-service=http
 
 # Rimuovere una porta
@@ -236,7 +236,7 @@ sudo firewall-cmd --reload
 <h2 id="gestione-pacchetti-con-dnf">Gestione pacchetti con DNF</h2>
 <p>DNF è il package manager di Oracle Linux 10 (successore di YUM). Gestisce l’installazione, aggiornamento e rimozione di software.</p>
 <p>Di seguito una serie di comandi base</p>
-<pre><code># Aggiornare tutti i pacchetti
+<pre><code class="language-bash"># Aggiornare tutti i pacchetti
 sudo dnf update -y
 
 # Installare un pacchetto
@@ -276,8 +276,15 @@ sudo dnf group install 'Development Tools' -y
 <h2 id="ssh-con-autenticazione-a-chiave">SSH con autenticazione a chiave</h2>
 <h3 id="macchina-remota-cloud">Macchina remota cloud</h3>
 <p>L’autenticazione con chiave SSH è più sicura della password. Generi una coppia di chiavi sul tuo PC, copi la chiave pubblica sul server, e da quel momento ti connetti senza digitare la password.</p>
-<p>Genera la coppia di chiavi (sul tuo PC)</p>
-<pre><code># Sul tuo computer locale (Windows PowerShell / macOS / Linux)
+<p>Installa <code>ssh</code> sul server</p>
+<pre><code class="language-bash">sudo dnf install openssh-server
+sudo systemctl enable --now sshd
+
+# per verificare ssh 
+sudo systemctl status sshd
+</code></pre>
+<p>Genera la coppia di chiavi in locale, sul tuo PC</p>
+<pre><code class="language-bash"># Sul tuo computer locale (Windows PowerShell / macOS / Linux)
 ssh-keygen -t ed25519 -C 'mio-server-oracle'
 
 # Ti chiede dove salvare (default: ~/.ssh/id_ed25519)
@@ -288,7 +295,7 @@ ssh-keygen -t ed25519 -C 'mio-server-oracle'
 #   ~/.ssh/id_ed25519.pub   (chiave pubblica - questa va sul server)
 </code></pre>
 <p>Copiare la chiave pubblica sul server</p>
-<pre><code># Metodo 1: ssh-copy-id (Linux/macOS)
+<pre><code class="language-bash"># Metodo 1: ssh-copy-id (Linux/macOS)
 ssh-copy-id -i ~/.ssh/id_ed25519.pub utente@ip-server
 
 # Metodo 2: manuale (se ssh-copy-id non è disponibile)
@@ -300,7 +307,7 @@ nano ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
 </code></pre>
 <p>Configura SSH sul server</p>
-<pre><code>sudo nano /etc/ssh/sshd_config
+<pre><code class="language-bash">sudo nano /etc/ssh/sshd_config
 
 # Valori consigliati:
 PubkeyAuthentication yes
@@ -316,9 +323,9 @@ sudo firewall-cmd --permanent --add-service=ssh
 sudo firewall-cmd --reload
 </code></pre>
 <p>Crea il file config SSH locale (sul tuo PC). Il file <code>~/.ssh/config</code> ti permette di definire alias e impostazioni per ogni server, evitando di digitare ogni volta ip, utente e chiave.</p>
-<pre><code># ~/.ssh/config
-
-Host oracle-dev
+<pre><code class="language-bash">nano ~/.ssh/config
+</code></pre>
+<pre><code>Host oracle-dev
     HostName 192.168.1.100
     User mario
     IdentityFile ~/.ssh/id_ed25519
@@ -328,6 +335,10 @@ Host oracle-prod
     HostName 10.0.0.50
     User deploy
     IdentityFile ~/.ssh/id_ed25519_prod
+</code></pre>
+<p>Modifica le permission del file creato</p>
+<pre><code class="language-bash">sudo chmod 600  ~/.ssh/config
+sudo chown $USER:$USER ~/.ssh/config
 </code></pre>
 <p>Con questo file puoi connetterti semplicemente con <code>ssh oracle-dev</code></p>
 <h3 id="macchina-locale-vmware">Macchina locale VMWare</h3>
@@ -350,7 +361,7 @@ ssh mario@192.168.86.128 -p 34522
 </code></pre>
 <h2 id="git-con-github-e-bitbucket">Git con GitHub e Bitbucket</h2>
 <p>Installazione e configurazione base</p>
-<pre><code>sudo dnf install git
+<pre><code class="language-bash">sudo dnf install git
 
 # Configurazione globale
 git config --global user.name 'NomeCognome'
@@ -359,20 +370,29 @@ git config --global user.email 'nome@esempio.it'
 # Verificare
 git config --list
 </code></pre>
+<p>Se la cartella <code>~/.ssh</code> non esiste creala ora</p>
+<pre><code class="language-bash">sudo mkdir ~/.ssh &#x26;&#x26; sudo chown -R $USER:$USER ~/.ssh
+</code></pre>
 <p>Autenticazione con chiave SSH: Sia GitHub che Bitbucket supportano l’autenticazione tramite chiave SSH. Il processo è lo stesso per entrambi.</p>
-<pre><code># Generare una chiave dedicata per GitHub
+<pre><code class="language-bash"># Generare una chiave dedicata per GitHub
 ssh-keygen -t ed25519 -C 'mario@esempio.it' -f ~/.ssh/id_github
 
 # Generare una chiave dedicata per Bitbucket
 ssh-keygen -t ed25519 -C 'mario@esempio.it' -f ~/.ssh/id_bitbucket
 
 # Aggiungere le chiavi all'agente SSH
-eval '$(ssh-agent -s)'     oppure     eval "$(ssh-agent)"
+eval '$(ssh-agent -s)'
+# oppure
+eval "$(ssh-agent)"
+# comandi per aggiungere chiavi
 ssh-add ~/.ssh/id_github
 ssh-add ~/.ssh/id_bitbucket
 
-# Visualizzare la chiave pubblica da copiare su GitHub/Bitbucket
-cat ~/.ssh/id_github.pub
+# per verificare le chiavi caricate 
+ssh-add -l
+</code></pre>
+<p>Per visualizzare le chiavi pubbliche da copiare su GitHub/Bitbucket</p>
+<pre><code class="language-bash">cat ~/.ssh/id_github.pub
 cat ~/.ssh/id_bitbucket.pub
 </code></pre>
 <p>Copia il contenuto di ogni .pub nelle rispettive impostazioni SSH del tuo account:</p>
@@ -381,7 +401,7 @@ cat ~/.ssh/id_bitbucket.pub
 <li>Bitbucket → Personal settings → SSH keys</li>
 </ul>
 <p>File config SSH per Git</p>
-<pre><code># Aggiungere a ~/.ssh/config
+<pre><code># nano ~/.ssh/config
 
 Host github.com
     HostName github.com
@@ -394,7 +414,7 @@ Host bitbucket.org
     IdentityFile ~/.ssh/id_bitbucket
 </code></pre>
 <p>Testa la connessione con</p>
-<pre><code>ssh -T git@github.com
+<pre><code class="language-bash">ssh -T git@github.com
 ssh -T git@bitbucket.org
 </code></pre>
 <h2 id="cartelle-condivise-vmware-shared-folders-e-samba">Cartelle condivise (VMware Shared Folders e Samba)</h2>
@@ -471,13 +491,19 @@ sudo dnf install httpd httpd-tools mod_ssl
 sudo systemctl enable --now httpd
 </code></pre>
 <p>Se la macchina è remota agiungiamo le seguenti regole al firewall</p>
-<pre><code># lancia i seguenti comandi per aprire il firewall
+<pre><code class="language-bash"># lancia i seguenti comandi per aprire il firewall
 sudo firewall-cmd --permanent --add-service=http
 sudo firewall-cmd --permanent --add-service=https
 sudo firewall-cmd --reload
 </code></pre>
+<p>Per comodità decido di settare una variabile che riassume la porta utilizza dal web server apache</p>
+<pre><code class="language-bash">export APACHE_PORT=80
+echo "export APACHE_PORT=80" >> ~/.bashrc
+</code></pre>
 <p>Se stai usando la macchina locale con NAT di seguito considero di aver fatto il port forwarding dalla porta <strong>34580</strong> (host) alla <strong>34580</strong> (guest). Quindi il web server apache risponderà all’indirizzo <code>http://localhost:34580</code>. Apporta le seguenti modifiche</p>
-<pre><code>sudo nano /etc/httpd/conf/httpd.conf
+<pre><code class="language-bash">export APACHE_PORT=34580
+
+sudo nano /etc/httpd/conf/httpd.conf
 
 # Assicurati che ci sia la seguente riga:
 Listen 34580
@@ -749,10 +775,81 @@ $cfg['Servers'][$i]['auth_type'] = 'config';
 $cfg['Servers'][$i]['AllowNoPassword'] = true;
 </code></pre>
 <h2 id="wordpress">Wordpress</h2>
-<p>Supponiamo di creare uno script che gestisce la creazione di istanze wordpress sotto la cartella <code>/var/www/html</code>. In questo specifico caso non ho bisogno di creare un file virtualhost. La porta utilizzata è quella locale di apache overo la <code>34580</code>. All’inizio dello script ci sono una serie di variabili da modificare secondo il tuo specifico caso</p>
-<pre><code>sudo nano /usr/local/bin/wp-manager.sh
+<p>Per una configurazione veloce di wordpress seguire questi passaggi.
+Supponiamo di voler creare il sito web <code>www.miosito.wp</code> avente come cartella root <code>/var/www/www.miosito.wp</code>. Inoltre suppongo sia già stato configurato correttamento il puntamento DNS. Per prima cosa scarichiamo wordpress e creiamo la cartella del sito.</p>
+<p>Cominciamo a creare il database <code>miositowp</code> e il relativo utente <code>utentesito</code> identificato da password <code>password</code></p>
+<pre><code class="language-bash">mariadb -u root -p
 </code></pre>
-<pre><code>#!/bin/bash
+<pre><code class="language-SQL">CREATE DATABASE miositowp DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+CREATE USER 'utentesito'@'%' IDENTIFIED BY 'password';
+GRANT ALL ON miositowp.* TO 'utentesito'@'%';
+FLUSH PRIVILEGES;
+EXIT;
+</code></pre>
+<p>Scarichiamo wordpress e creiamo la cartella per il nuovo sito</p>
+<pre><code class="language-bash">cd /var/www
+sudo wget https://wordpress.org/latest.tar.gz
+sudo tar xzf latest.tar.gz
+sudo mv wordpress www.miosito.wp
+sudo rm latest.tar.gz
+</code></pre>
+<p>Da dentro la cartella del sito appena creato apri in modifica il file config di wordpress</p>
+<pre><code class="language-bash">cd /var/www/www.miosito.wp
+sudo cp wp-config-sample.php wp-config.php
+sudo nano wp-config.php
+</code></pre>
+<p>modifica le seguenti costanti</p>
+<pre><code class="language-php">define( 'DB_NAME', 'nomedb' );
+define( 'DB_USER', 'utentedb' );
+define( 'DB_PASSWORD', 'passwordutente' );
+</code></pre>
+<p>Visitando <a href="https://api.wordpress.org/secret-key/1.1/salt/">questo sito</a> aggiungi queste informazioni casuali sostituendo le costanti presenti</p>
+<pre><code class="language-php">define( 'AUTH_KEY',         '' );
+define( 'SECURE_AUTH_KEY',  '' );
+define( 'LOGGED_IN_KEY',    '' );
+define( 'NONCE_KEY',        '' );
+define( 'AUTH_SALT',        '' );
+define( 'SECURE_AUTH_SALT', '' );
+define( 'LOGGED_IN_SALT',   '' );
+define( 'NONCE_SALT',       '' );
+</code></pre>
+<p>Infine per comodità, dopo la costante <code>WP_DEBUG</code> aggiungi le seguenti costanti</p>
+<pre><code class="language-php">define( 'WP_POST_REVISIONS', 5 );
+define( 'WP_AUTO_UPDATE_CORE', false );
+define( 'ALLOW_UNFILTERED_UPLOADS', true );
+</code></pre>
+<p>Crea ora il file per il sito</p>
+<pre><code class="language-bash">sudo tee /etc/httpd/conf.d/www.miosito.wp.conf > /dev/null &#x3C;&#x3C;EOF
+&#x3C;VirtualHost *:$APACHE_PORT>
+    ServerName www.miosito.wp
+    DocumentRoot /var/www/www.miosito.wp
+    
+    &#x3C;Directory /var/www/www.miosito.wp>
+        DirectoryIndex index.php index.html
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    &#x3C;/Directory>
+    
+    ErrorLog /var/log/httpd/miosito.local_error.log
+    CustomLog /var/log/httpd/miosito.local_access.log combined
+&#x3C;/VirtualHost>
+EOF
+</code></pre>
+<p>Aggiorna i permessi per la cartella root del sito</p>
+<pre><code class="language-bash">sudo chown -R apache:apache /var/www/www.miosito.wp
+sudo find /var/www/www.miosito.wp -type d -exec chmod 775 {} \;
+sudo find /var/www/www.miosito.wp -type f -exec chmod 664 {} \;
+</code></pre>
+<p>Controlla che non ci siano errori e riavvia apache</p>
+<pre><code class="language-bash">sudo apachectl configtest
+sudo systemctl restart httpd
+sudo systemctl status httpd
+</code></pre>
+<p>Supponiamo di creare ora uno script che gestisce la creazione di istanze wordpress sotto la cartella <code>/var/www/html</code>. In questo specifico caso non ho bisogno di creare un file virtualhost. La porta utilizzata è quella locale di apache overo la <code>34580</code>. All’inizio dello script ci sono una serie di variabili da modificare secondo il tuo specifico caso</p>
+<pre><code class="language-bash">sudo nano /usr/local/bin/wp-manager.sh
+</code></pre>
+<pre><code class="language-bash">#!/bin/bash
 # wp-manager.sh - Gestione istanze WordPress
 #
 # Uso:
@@ -911,10 +1008,10 @@ case "$1" in
 esac
 </code></pre>
 <p>Per rendere eseguibile lo script</p>
-<pre><code>sudo chmod +x /usr/local/bin/wp-manager.sh
+<pre><code class="language-bash">sudo chmod +x /usr/local/bin/wp-manager.sh
 </code></pre>
 <p>Esempi d’uso dello script</p>
-<pre><code># creo una nuova istanza con nome cartella "miosito" e nome database "miosito_db"
+<pre><code class="language-bash"># creo una nuova istanza con nome cartella "miosito" e nome database "miosito_db"
 wp-manager.sh create miosito miosito_db
 
 # elenco le istanze disponbili
@@ -926,7 +1023,7 @@ wp-manager.sh delete miosito miosito_db
 <p>Dopo <code>create</code>, apri il browser su <code>http://localhost:34580/miosito</code> per completare l’installazione di WordPress.</p>
 <h2 id="certificati-ssltls-per-i-siti-apache">Certificati SSL/TLS per i siti Apache</h2>
 <p>Usiamo Certbot con Let’s Encrypt per i siti raggiungibili da internet. Let’s Encrypt fornisce certificati gratuiti e riconosciuti da tutti i browser.</p>
-<pre><code># Installare Certbot
+<pre><code class="language-bash"># Installare Certbot
 sudo dnf install certbot python3-certbot-apache -y
 
 # Ottenere e installare il certificato (modifica automaticamente il virtual host)
@@ -938,13 +1035,13 @@ sudo certbot --apache -d miosito.com -d www.miosito.com
 # - se redirigere HTTP → HTTPS automaticamente (consigliato: sì)
 </code></pre>
 <p>Il certificato viene rinnovato automaticamente. Puoi testare il rinnovo con:</p>
-<pre><code>sudo certbot renew --dry-run
+<pre><code class="language-bash">sudo certbot renew --dry-run
 </code></pre>
 <p>Per Elencare i certificati Let’s Encrypt gestiti da Certbot</p>
-<pre><code>sudo certbot certificates
+<pre><code class="language-bash">sudo certbot certificates
 </code></pre>
 <p>Per rimuovere un certificato Let’s Encrypt:</p>
-<pre><code># Revocare e cancellare il certificato
+<pre><code class="language-bash"># Revocare e cancellare il certificato
 sudo certbot delete --cert-name miosito.com
 
 # In alternativa, solo revocare (mantiene i file)
@@ -956,7 +1053,7 @@ sudo systemctl reload httpd
 </code></pre>
 <h2 id="basic-auth-apache">Basic Auth Apache</h2>
 <p>Crea il file delle password</p>
-<pre><code># Crea la directory per i file di auth (fuori dal webroot)
+<pre><code class="language-bash"># Crea la directory per i file di auth (fuori dal webroot)
 sudo mkdir -p /etc/httpd/auth
 
 # Crea il primo utente (-c crea il file, usalo solo la prima volta)
@@ -994,11 +1091,11 @@ sudo htpasswd /etc/httpd/auth/pma.htpasswd altrouser
 </code></pre>
 <p>Il file conf relativo alla porta <code>:80</code> non serve modificarlo perché fa già redirect a HTTPS.</p>
 <p>Aggiusta i permessi sul file htpasswd</p>
-<pre><code>sudo chown root:apache /etc/httpd/auth/pma.htpasswd
+<pre><code class="language-bash">sudo chown root:apache /etc/httpd/auth/pma.htpasswd
 sudo chmod 640 /etc/httpd/auth/pma.htpasswd
 </code></pre>
 <p>Verifica la configurazione e riavvia Apache</p>
-<pre><code># Controlla che non ci siano errori di sintassi
+<pre><code class="language-bash"># Controlla che non ci siano errori di sintassi
 sudo apachectl configtest
 
 # Riavvia Apache

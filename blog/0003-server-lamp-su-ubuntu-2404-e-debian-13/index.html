@@ -24,6 +24,14 @@
 <p>L’immagine precedente imposta la reole per accedere alla macchina con ssh. Per accedere alla macchina posso usare il comando seguente, sostituendo il nome utente reale</p>
 <pre><code>ssh localhost@[nomeutente] -p 34522
 </code></pre>
+<h3 id="utente-locale">Utente locale</h3>
+<p>Su alcune distribuzioni Debian vi è solamente l’utente di root. In questo caso creare l’utente locale e assegnali i permessi per eseguire sudo</p>
+<pre><code class="language-bash"># comandi eseguiti come root
+apt update &#x26;&#x26; apt install sudo
+
+adduser &#x3C;nomeutente>
+usermod -aG sudo &#x3C;nomeutente>
+</code></pre>
 <h3 id="vmware-tools">VMWare Tools</h3>
 <p>Nel caso di VMWare è possibile installare i tools eseguendo i seguenti comandi</p>
 <pre><code>sudo apt install open-vm-tools open-vm-tools-desktop
@@ -36,7 +44,7 @@
 </code></pre>
 <h3 id="comandi-di-sistema-essenziali">Comandi di sistema essenziali</h3>
 <p>Ecco i comandi che userai di più nella gestione quotidiana</p>
-<pre><code># Aggiornare il sistema
+<pre><code class="language-bash"># Aggiornare il sistema
 sudo apt update
 sudo apt upgrade
 
@@ -64,7 +72,7 @@ df -h         # spazio disco
 free -h       # memoria RAM
 </code></pre>
 <p>Di seguito ti propongo una serie di programmi base di utilità generale</p>
-<pre><code>sudo apt install wget curl nano zip unzip htop dos2unix curl wget unzip p7zip
+<pre><code class="language-bash">sudo apt install wget curl nano zip unzip htop dos2unix curl wget unzip p7zip
 
 # per installare python 
 sudo apt install python3 python3-pip
@@ -72,20 +80,9 @@ sudo apt install python3 python3-pip
 # per montare file system ntfs
 sudo apt install ntfs-3g
 </code></pre>
-<p>Se stai usando un macchina cloud e devi creare il tuo utente puoi seguire questi comandi (da lanciare con root)</p>
-<pre><code>
-# aggiorna la macchina e poi installa sudo
-apt update &#x26;&#x26; apt install sudo
-
-# Aggiungi l'utente scelto
-adduser [nomeutente]
-
-# aggiungi l'utente al gruppo sudo per eseguire comandi con sudo
-usermod -aG sudo [nomeutente]
-</code></pre>
 <h3 id="impostare-il-timezone">Impostare il timezone</h3>
 <p>Verifica che il tuo timezone sia corretto, e nel caso correggilo con i seguenti comandi</p>
-<pre><code># Verificare
+<pre><code class="language-bash"># Verificare
 timedatectl
 
 # Elencare i timezone disponibili (filtrando per Europa)
@@ -96,7 +93,7 @@ sudo timedatectl set-timezone Europe/Rome
 </code></pre>
 <h3 id="gestione-pachetti-con-apt">Gestione pachetti con APT</h3>
 <p><code>apt</code> è il gestore di pacchetti di Ubuntu/Debian. Richiede privilegi di root <code>sudo</code>.</p>
-<pre><code># Prima di installare o cercare pacchetti, aggiorna l'indice locale
+<pre><code class="language-bash"># Prima di installare o cercare pacchetti, aggiorna l'indice locale
 sudo apt update
 
 # per installare un programma
@@ -128,7 +125,7 @@ sudo dpkg -s nome-pacchetto
 </code></pre>
 <h2 id="firewall-ufw">Firewall (ufw)</h2>
 <p><code>ufw</code> (Uncomplicated Firewall) è il frontend semplificato per <strong>iptables</strong> incluso in Ubuntu. Su Debian potrebbe non essere preinstallato.</p>
-<pre><code># Verificare se ufw è installato
+<pre><code class="language-bash"># Verificare se ufw è installato
 which ufw
 
 # se non è installato lo puoi installare con 
@@ -180,7 +177,7 @@ sudo ufw reset
 <h3 id="macchian-remota-cloud">Macchian remota cloud</h3>
 <p>L’autenticazione con chiave SSH è più sicura della password. Generi una coppia di chiavi sul tuo PC, copi la chiave pubblica sul server, e da quel momento ti connetti senza digitare la password.</p>
 <p>Genera la coppia di chiavi (sul tuo PC)</p>
-<pre><code># Sul tuo computer locale (Windows PowerShell / macOS / Linux)
+<pre><code class="language-bash"># Sul tuo computer locale (Windows PowerShell / macOS / Linux)
 ssh-keygen -t ed25519 -C 'mio-server-ubuntu'
 
 # Ti chiede dove salvare (default: ~/.ssh/id_ed25519)
@@ -190,8 +187,12 @@ ssh-keygen -t ed25519 -C 'mio-server-ubuntu'
 #   ~/.ssh/id_ed25519       (chiave privata - non condividere mai!)
 #   ~/.ssh/id_ed25519.pub   (chiave pubblica - questa va sul server)
 </code></pre>
+<p>Installa sul server openssh</p>
+<pre><code class="language-bash">sudo apt install openssh-client openssh-server
+sudo systemctl start ssh &#x26;&#x26; sudo systemctl enable ssh
+</code></pre>
 <p>Copiare la chiave pubblica sul server</p>
-<pre><code># Metodo 1: ssh-copy-id (Linux/macOS)
+<pre><code class="language-bash"># Metodo 1: ssh-copy-id (Linux/macOS)
 ssh-copy-id -i ~/.ssh/id_ed25519.pub utente@ip-server
 
 # Metodo 2: manuale (se ssh-copy-id non è disponibile)
@@ -203,7 +204,7 @@ nano ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
 </code></pre>
 <p>Configura SSH sul server</p>
-<pre><code>sudo nano /etc/ssh/sshd_config
+<pre><code class="language-bash">sudo nano /etc/ssh/sshd_config
 
 # Valori consigliati:
 PubkeyAuthentication yes
@@ -219,9 +220,9 @@ sudo firewall-cmd --permanent --add-service=ssh
 sudo firewall-cmd --reload
 </code></pre>
 <p>Crea il file config SSH locale (sul tuo PC). Il file <code>~/.ssh/config</code> ti permette di definire alias e impostazioni per ogni server, evitando di digitare ogni volta ip, utente e chiave.</p>
-<pre><code># ~/.ssh/config
-
-Host ubuntu-cloud
+<pre><code class="language-bash">sudo nano ~/.ssh/config
+</code></pre>
+<pre><code>Host ubuntu-cloud
     HostName 192.168.1.100
     User mario
     IdentityFile ~/.ssh/id_ed25519
@@ -231,6 +232,9 @@ Host debian-prod
     HostName 10.0.0.50
     User deploy
     IdentityFile ~/.ssh/id_ed25519_prod
+</code></pre>
+<p>Aggiusta i permessi</p>
+<pre><code class="language-bash">sudo chmod 600 ~/.ssh/config
 </code></pre>
 <p>Con questo file puoi connetterti semplicemente con <code>ssh ubuntu-cloud</code></p>
 <h3 id="macchina-locale-vmware">Macchina locale VMWare</h3>
@@ -253,7 +257,7 @@ ssh mario@192.168.86.128 -p 34522
 </code></pre>
 <h2 id="git-con-github-e-bitbucket">Git con GitHub e Bitbucket</h2>
 <p>Installazione e configurazione base</p>
-<pre><code>sudo apt install git openssh-client
+<pre><code class="language-bash">sudo apt install git openssh-client
 
 # Configurazione globale
 git config --global user.name 'NomeCognome'
@@ -261,6 +265,9 @@ git config --global user.email 'nome@esempio.it'
 
 # Verificare
 git config --list
+</code></pre>
+<p>Crea la cartella <code>~/.ssh</code> se non esiste</p>
+<pre><code class="language-bash">sudo mkdir -p  ~/.ssh &#x26;&#x26; sudo chown -R $USER:$USER ~/.ssh
 </code></pre>
 <p>Autenticazione con chiave SSH: Sia GitHub che Bitbucket supportano l’autenticazione tramite chiave SSH. Il processo è lo stesso per entrambi.</p>
 <pre><code># Generare una chiave dedicata per GitHub
@@ -459,7 +466,7 @@ sudo a2dissite miosito.com
 sudo systemctl restart apache2
 </code></pre>
 <p>Se sono in locale per comodità posso aggiungere il mio utente locale al gruppo <strong>www-data</strong> di apache</p>
-<pre><code>sudo usermod -aG www-data $USER
+<pre><code class="language-bash">sudo usermod -aG www-data $USER
 
 # riavvia macchina
 sudo reboot
@@ -468,13 +475,13 @@ sudo reboot
 groups
 </code></pre>
 <p>D’ora in poi posso aggiornare i permessi della cartella <code>/var/www</code> nel seguente modo (di modo che possA modificare i files con il mio utente locale)</p>
-<pre><code># Imposta permessi corretti
+<pre><code class="language-bash"># Imposta permessi corretti
 sudo chown www-data:www-data -R /var/www
 sudo find /var/www -type d -exec chmod 775 {} \;
 sudo find /var/www -type f -exec chmod 664 {} \;
 </code></pre>
 <p>Come utility creo uno script per aggiornare i permessi della cartella corrente, di modo che possa modificare senza problemi i files e cartelle con il mio utente locale</p>
-<pre><code>sudo nano /usr/local/bin/aggiorna_permessi_web.sh
+<pre><code class="language-bash">sudo nano /usr/local/bin/aggiorna_permessi_web.sh
 
 #!/bin/bash
 
@@ -506,10 +513,10 @@ sudo find . -type f -exec chmod 664 {} \;
 echo "Permissions updated successfully!"
 </code></pre>
 <p>Rendi eseguibile lo script con</p>
-<pre><code>sudo chmod +x /usr/local/bin/aggiorna_permessi_web.sh
+<pre><code class="language-bash">sudo chmod +x /usr/local/bin/aggiorna_permessi_web.sh
 </code></pre>
 <p>Per vedere i log di apache</p>
-<pre><code>sudo tail /var/log/apache2/error.log
+<pre><code class="language-bash">sudo tail /var/log/apache2/error.log
 sudo tail /var/log/php*-fpm.log
 </code></pre>
 <h3 id="php-85">PHP 8.5</h3>
@@ -590,7 +597,7 @@ sudo apt clean &#x26;&#x26; sudo apt autoclean &#x26;&#x26; sudo apt autoremove 
 </code></pre>
 <h3 id="mariadb">MariaDB</h3>
 <p>Lancia i seguenti comandi</p>
-<pre><code>sudo apt-get install apt-transport-https curl
+<pre><code class="language-bash">sudo apt-get install apt-transport-https curl
 sudo mkdir -p /etc/apt/keyrings
 sudo curl -o /etc/apt/keyrings/mariadb-keyring.pgp 'https://mariadb.org/mariadb_release_signing_key.pgp'
 </code></pre>
@@ -604,7 +611,7 @@ Suites: noble
 Components: main main/debug
 Signed-By: /etc/apt/keyrings/mariadb-keyring.pgp
 </code></pre>
-<p>Per debian 13 crea invece il seguente file con il seguente contenuto</p>
+<p>Per <strong>debian 13</strong> crea invece il seguente file con il seguente contenuto</p>
 <pre><code>sudo nano /etc/apt/sources.list.d/mariadb.sources
 
 X-Repolib-Name: MariaDB
@@ -615,14 +622,14 @@ Components: main
 Signed-By: /etc/apt/keyrings/mariadb-keyring.pgp
 </code></pre>
 <p>Dopodichè procedi con l’installazione vera e propria</p>
-<pre><code>sudo apt update
+<pre><code class="language-bash">sudo apt update
 sudo apt install mariadb-server
 </code></pre>
 <p>Abilitiamo all’avvio mariadb e verifichiamo lo status</p>
-<pre><code>sudo systemctl enable mariadb &#x26;&#x26; sudo systemctl status mariadb
+<pre><code class="language-bash">sudo systemctl enable mariadb &#x26;&#x26; sudo systemctl status mariadb
 </code></pre>
 <p>Avviamo il wizard di configurazione</p>
-<pre><code>sudo mariadb-secure-installation
+<pre><code class="language-bash">sudo mariadb-secure-installation
 
 # Rispondere così:
 # Enter current password for root: [invio - vuota di default]
@@ -634,7 +641,7 @@ sudo apt install mariadb-server
 # Reload privilege tables: Y
 </code></pre>
 <p>Per rimuovere completamente mariadb</p>
-<pre><code>sudo systemctl stop mariadb &#x26;&#x26; sudo systemctl disable mariadb
+<pre><code class="language-bash">sudo systemctl stop mariadb &#x26;&#x26; sudo systemctl disable mariadb
 sudo apt purge mariadb*
 sudo rm -rf /var/lib/mysql &#x26;&#x26; sudo rm -rf /etc/mysql
 sudo deluser mysql &#x26;&#x26; sudo delgroup mysql
@@ -656,7 +663,7 @@ EXIT;
 <h2 id="phpmyadmin">phpMyAdmin</h2>
 <p>Scarichiamo l’ultima versione di phpMyAdmin e rendiamo il sito disponibile sotto <code>http://localhost:[PORTA]/pma</code>.</p>
 <p>Procediamo con l’installazione</p>
-<pre><code># scarico sorgenti
+<pre><code class="language-bash"># scarico sorgenti
 cd /var/www/html 
 sudo wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz
 sudo tar xzf phpMyAdmin-latest-all-languages.tar.gz
@@ -681,6 +688,78 @@ sudo find . -type d -exec chmod 775 {} \;
 sudo find . -type f -exec chmod 664 {} \;
 </code></pre>
 <h2 id="wordpress">Wordpress</h2>
+<p>Per una configurazione veloce di wordpress seguire questi passaggi.
+Supponiamo di voler creare il sito web <code>www.miosito.wp</code> avente come cartella root <code>/var/www/www.miosito.wp</code>. Inoltre suppongo sia già stato configurato correttamento il puntamento DNS. Per prima cosa scarichiamo wordpress e creiamo la cartella del sito.</p>
+<p>Cominciamo a creare il database <code>miositowp</code> e il relativo utente <code>utentesito</code> identificato da password <code>password</code></p>
+<pre><code class="language-bash">mariadb -u root -p
+</code></pre>
+<pre><code class="language-SQL">CREATE DATABASE miositowp DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+CREATE USER 'utentesito'@'%' IDENTIFIED BY 'password';
+GRANT ALL ON miositowp.* TO 'utentesito'@'%';
+FLUSH PRIVILEGES;
+EXIT;
+</code></pre>
+<p>Scarichiamo wordpress e creiamo la cartella per il nuovo sito</p>
+<pre><code class="language-bash">cd /var/www
+sudo wget https://wordpress.org/latest.tar.gz
+sudo tar xzf latest.tar.gz
+sudo mv wordpress www.miosito.wp
+sudo rm latest.tar.gz
+</code></pre>
+<p>Da dentro la cartella del sito appena creato apri in modifica il file config di wordpress</p>
+<pre><code class="language-bash">cd /var/www/www.miosito.wp
+sudo cp wp-config-sample.php wp-config.php
+sudo nano wp-config.php
+</code></pre>
+<p>modifica le seguenti costanti</p>
+<pre><code class="language-php">define( 'DB_NAME', 'nomedb' );
+define( 'DB_USER', 'utentedb' );
+define( 'DB_PASSWORD', 'passwordutente' );
+</code></pre>
+<p>Visitando <a href="https://api.wordpress.org/secret-key/1.1/salt/">questo sito</a> aggiungi queste informazioni casuali sostituendo le costanti presenti</p>
+<pre><code class="language-php">define( 'AUTH_KEY',         '' );
+define( 'SECURE_AUTH_KEY',  '' );
+define( 'LOGGED_IN_KEY',    '' );
+define( 'NONCE_KEY',        '' );
+define( 'AUTH_SALT',        '' );
+define( 'SECURE_AUTH_SALT', '' );
+define( 'LOGGED_IN_SALT',   '' );
+define( 'NONCE_SALT',       '' );
+</code></pre>
+<p>Infine per comodità, dopo la costante <code>WP_DEBUG</code> aggiungi le seguenti costanti</p>
+<pre><code class="language-php">define( 'WP_POST_REVISIONS', 5 );
+define( 'WP_AUTO_UPDATE_CORE', false );
+define( 'ALLOW_UNFILTERED_UPLOADS', true );
+</code></pre>
+<p>Crea ora il file per il sito</p>
+<pre><code class="language-bash">sudo tee /etc/apache2/sites-available/www.miosito.wp.conf > /dev/null &#x3C;&#x3C;EOF
+&#x3C;VirtualHost *:80>
+    ServerName www.miosito.wp
+    DocumentRoot /var/www/www.miosito.wp
+    
+    &#x3C;Directory /var/www/www.miosito.wp>
+        DirectoryIndex index.php index.html
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    &#x3C;/Directory>
+    
+    ErrorLog ${APACHE_LOG_DIR}/miosito.error.log
+    CustomLog ${APACHE_LOG_DIR}/miosito.access.log combined
+&#x3C;/VirtualHost>
+EOF
+</code></pre>
+<p>Aggiorna i permessi per la cartella root del sito</p>
+<pre><code class="language-bash">sudo chown -R www-data:www-data /var/www/www.miosito.wp
+sudo find /var/www/www.miosito.wp -type d -exec chmod 775 {} \;
+sudo find /var/www/www.miosito.wp -type f -exec chmod 664 {} \;
+</code></pre>
+<p>Abilita il sito, controlla che non ci siano errori e riavvia apache</p>
+<pre><code class="language-bash">sudo a2ensite www.miosito.wp
+sudo apache2ctl configtest
+sudo systemctl restart apache2
+sudo systemctl status apache2
+</code></pre>
 <p>Supponiamo di creare uno script che gestisce la creazione di istanze wordpress sotto la cartella <code>/var/www/html</code>. La porta utilizzata è quella locale di apache overo la <code>34580</code></p>
 <pre><code>sudo nano /usr/local/bin/wp-manager.sh
 </code></pre>

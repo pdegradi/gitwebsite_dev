@@ -1,0 +1,159 @@
+<!DOCTYPE html><html lang="it" data-bs-theme="dark"> <head><!-- 
+		preconnect Ottimizza le connessioni esterne 
+		I file di Bootstrap vengono caricati da cdn.jsdelivr.net. Il browser perde tempo a "cercare" dove si trova questo server (DNS lookup) e a stabilire una connessione sicura.
+		Soluzione: Aggiungi queste due righe in cima al tuo <head>, prima di ogni altra cosa: 
+	--><link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v6.1.3"><title>Condividere cartelle su Linux con Samba: guida pratica | Pablo Dev</title><meta name="description" content="Scopri come installare e configurare Samba su Linux per condividere cartelle in rete locale. Guida pratica con istruzioni per connettersi da Windows 11, Ubuntu/Debian e RHEL/Fedora."><link rel="canonical" href="https://pablodev.pubcloud.net/blog/0010-samba-linux-condivisione-cartelle/"><meta property="og:title" content="Condividere cartelle su Linux con Samba: guida pratica | Pablo Dev"><meta property="og:description" content="Scopri come installare e configurare Samba su Linux per condividere cartelle in rete locale. Guida pratica con istruzioni per connettersi da Windows 11, Ubuntu/Debian e RHEL/Fedora."><meta property="og:url" content="https://pablodev.pubcloud.net/blog/0010-samba-linux-condivisione-cartelle/"><meta property="og:type" content="article"><meta property="og:site_name" content="Pablo Dev"><meta property="og:image" content="https://pablodev.pubcloud.net/images/blog/samba-linux-SO.webp"><meta property="article:published_time" content="2026-05-09"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Condividere cartelle su Linux con Samba: guida pratica | Pablo Dev"><meta name="twitter:description" content="Scopri come installare e configurare Samba su Linux per condividere cartelle in rete locale. Guida pratica con istruzioni per connettersi da Windows 11, Ubuntu/Debian e RHEL/Fedora."><meta name="twitter:image" content="https://pablodev.pubcloud.net/images/blog/samba-linux-SO.webp"><meta name="google-site-verification" content="BxY2GMt1bMEuHSSFjgpTSqk-jNTcWCi_QyK-K0W6ncU">
+		<meta name="msvalidate.01" content="459786BEF673C99279D8774CC75C50E0"><link rel="sitemap" href="/sitemap-index.xml"><link rel="icon" href="data:,"><!-- blank favicon --><!-- Bootstrap Icons --><link rel="stylesheet" href="/vendors/bootstrap-icons-1.13.1/bootstrap-icons.min.css"><!-- stili nel file main.scss importati come ultimi --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","name":"Pablo Dev","url":"https://pablodev.pubcloud.net","description":"Sviluppo Software Web & AI Integration","datePublished":"2026-05-09","author":{"@type":"Person","name":"Pablo"}}</script><link rel="stylesheet" href="/_astro/BaseLayout.BMuug6mF.css"></head> <body> <nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary border-bottom"> <div class="container"> <a class="navbar-brand fw-bold" href="/">Pablo Dev</a> <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button> <div class="collapse navbar-collapse" id="navbarNav"> <ul class="navbar-nav ms-auto gap-2"> <li class="nav-item"> <a class="nav-link" href="/">Home</a> </li> <li class="nav-item"><a class="nav-link" href="/blog">Blog</a></li>
+						<li class="nav-item"><a class="nav-link" href="/progetti">Progetti</a></li>
+						<li class="nav-item"> <a class="nav-link" href="https://www.youtube.com/@pablodev-yt" target="_blank" rel="noopener noreferrer"> <i class="bi bi-youtube me-1"></i>YouTube
+</a> </li>  </ul> </div> </div> </nav> <main>  <article class="container py-5"> <div class="mb-4"> <a href="/blog" class="btn btn-outline-secondary btn-sm"> <i class="bi bi-arrow-left me-1"></i>Tutti gli articoli
+</a> </div> <h1 class="mb-2 text-center">Condividere cartelle su Linux con Samba: guida pratica</h1> <p class="text-body-secondary mb-4 text-center"> <i class="bi bi-calendar3 me-1"></i> <time datetime="2026-05-09">9 maggio 2026</time> </p> <div class="row justify-content-center"> <div class="col-lg-8"> <img src="/images/blog/samba-linux-SO.webp" alt="Samba Linux" class="article-cover rounded mb-4"> <nav id="toc-container" class="card bg-body-tertiary border mt-4 mb-5 p-3" aria-label="Indice dei contenuti"> <h2 class="h4 text-uppercase text-body-secondary mb-3"> <i class="bi bi-list-ul me-1"></i> Indice
+</h2> <ul class="toc-list" id="toc-list"></ul> </nav> <div id="article-content"> <p>Samba è un’implementazione del protocollo SMB/CIFS che permette di condividere file e cartelle tra sistemi operativi diversi — Linux, Windows e macOS — all’interno della stessa rete locale. Questa guida mostra come installarlo, configurarlo e accedervi da altri dispositivi.</p>
+<h2 id="installazione">Installazione</h2>
+<p>Su distribuzioni basate su <strong>RHEL/Fedora</strong> (Fedora, Rocky Linux, AlmaLinux, CentOS Stream):</p>
+<pre><code class="language-bash">sudo dnf install samba samba-client samba-common -y
+</code></pre>
+<p>Su distribuzioni basate su <strong>Debian/Ubuntu</strong>:</p>
+<pre><code class="language-bash">sudo apt install samba samba-client -y
+</code></pre>
+<h2 id="configurazione">Configurazione</h2>
+<p>Prima di modificare il file di configurazione, è buona pratica crearne un backup:</p>
+<pre><code class="language-bash">sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.backup
+</code></pre>
+<p>Apri il file di configurazione:</p>
+<pre><code class="language-bash">sudo nano /etc/samba/smb.conf
+</code></pre>
+<p>Aggiungi in fondo al file la definizione della cartella condivisa. L’esempio seguente condivide la home dell’utente <code>pablo</code>:</p>
+<pre><code class="language-ini">[home]
+    path = /home/pablo
+    browsable = yes
+    read only = no
+    writable = yes
+    create mask = 0777
+    directory mask = 0777
+    valid users = pablo
+    guest ok = no
+    force user = pablo
+    force group = pablo
+</code></pre>
+<p>Modifica <code>pablo</code> con il nome del tuo utente e <code>path</code> con il percorso della cartella che vuoi condividere.</p>
+<h2 id="aggiungere-lutente-a-samba">Aggiungere l’utente a Samba</h2>
+<p>Samba gestisce le password separatamente dal sistema. Aggiungi il tuo utente con:</p>
+<pre><code class="language-bash">sudo smbpasswd -a $USER
+</code></pre>
+<p>Il comando richiederà di impostare una password dedicata per Samba.</p>
+<h2 id="avvio-del-servizio-e-configurazione-del-firewall">Avvio del servizio e configurazione del firewall</h2>
+<p>Avvia il servizio e abilitalo all’avvio automatico:</p>
+<pre><code class="language-bash">sudo systemctl restart smb
+sudo systemctl enable smb
+</code></pre>
+<p>Apri le porte necessarie nel firewall:</p>
+<pre><code class="language-bash">sudo firewall-cmd --permanent --add-service=samba
+sudo firewall-cmd --reload
+</code></pre>
+<blockquote>
+<p>Su sistemi con <code>ufw</code> (Ubuntu/Debian), usa invece:</p>
+<pre><code class="language-bash">sudo ufw allow samba
+</code></pre>
+</blockquote>
+<h2 id="connettersi-alla-condivisione-da-altri-dispositivi">Connettersi alla condivisione da altri dispositivi</h2>
+<h3 id="windows-11">Windows 11</h3>
+<ol>
+<li>Apri <strong>Esplora file</strong>.</li>
+<li>Nella barra degli indirizzi digita: <code>\\&#x3C;IP_DEL_SERVER>\home</code></li>
+<li>Inserisci le credenziali Samba quando richiesto (utente e password impostati con <code>smbpasswd</code>).</li>
+</ol>
+<p>Per rendere la connessione permanente, clicca con il tasto destro su <strong>Questo PC</strong> → <strong>Connetti unità di rete</strong>, seleziona una lettera e inserisci il percorso UNC.</p>
+<p>Per trovare l’IP del server Linux:</p>
+<pre><code class="language-bash">ip a
+</code></pre>
+<h3 id="linux--ubuntudebian">Linux — Ubuntu/Debian</h3>
+<p>Installa il client Samba se non è già presente:</p>
+<pre><code class="language-bash">sudo apt install smbclient cifs-utils -y
+</code></pre>
+<p><strong>Accesso temporaneo</strong> tramite terminale:</p>
+<pre><code class="language-bash">smbclient //192.168.1.100/home -U pablo
+</code></pre>
+<p><strong>Montaggio permanente</strong> — aggiungi questa riga a <code>/etc/fstab</code>:</p>
+<pre><code>//192.168.1.100/home  /mnt/samba-home  cifs  credentials=/etc/samba/.smbcredentials,uid=1000,gid=1000,iocharset=utf8  0  0
+</code></pre>
+<p>Crea il file delle credenziali:</p>
+<pre><code class="language-bash">sudo nano /etc/samba/.smbcredentials
+</code></pre>
+<pre><code>username=pablo
+password=tuapassword
+</code></pre>
+<p>Imposta i permessi corretti:</p>
+<pre><code class="language-bash">sudo chmod 600 /etc/samba/.smbcredentials
+</code></pre>
+<p>Crea il punto di mount e monta:</p>
+<pre><code class="language-bash">sudo mkdir -p /mnt/samba-home
+sudo mount -a
+</code></pre>
+<h3 id="linux--rhelfedora">Linux — RHEL/Fedora</h3>
+<p>Installa i pacchetti necessari:</p>
+<pre><code class="language-bash">sudo dnf install samba-client cifs-utils -y
+</code></pre>
+<p>La procedura di montaggio è identica a quella Debian/Ubuntu descritta sopra. L’unica differenza riguarda SELinux: se il montaggio fallisce, potrebbe essere necessario abilitare il boolean appropriato:</p>
+<pre><code class="language-bash">sudo setsebool -P samba_enable_home_dirs on
+</code></pre>
+<h2 id="verifica-della-configurazione">Verifica della configurazione</h2>
+<p>Prima di riavviare il servizio, puoi validare la configurazione con:</p>
+<pre><code class="language-bash">testparm
+</code></pre>
+<p>Il comando segnala eventuali errori o avvisi nel file <code>smb.conf</code>.</p>
+<h2 id="riferimento-rapido">Riferimento rapido</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Sistema client</th><th>Pacchetto richiesto</th><th>Comando di accesso</th></tr></thead><tbody><tr><td>Windows 11</td><td>—</td><td><code>\\&#x3C;IP>\&#x3C;share></code> da Esplora file</td></tr><tr><td>Ubuntu/Debian</td><td><code>cifs-utils</code></td><td><code>mount -t cifs</code> o <code>smbclient</code></td></tr><tr><td>RHEL/Fedora</td><td><code>cifs-utils</code></td><td><code>mount -t cifs</code> o <code>smbclient</code></td></tr></tbody></table>
+<h2 id="note-finali">Note finali</h2>
+<ul>
+<li>Usa sempre password dedicate per Samba, distinte da quelle di sistema.</li>
+<li>Limita l’accesso con <code>valid users</code> per evitare condivisioni aperte.</li>
+<li>In ambienti con SELinux attivo, verifica i boolean con <code>getsebool -a | grep samba</code>.</li>
+</ul> </div> </div> </div> </article>  </main> <!-- ══ FOOTER ══════════════════════════════════════════════════════ --> <footer class="border-top border-secondary-subtle py-5 mt-5"> <div class="container"> <div class="row gy-4 pb-5"> <div class="col-lg-4"> <p class="fw-semibold text-uppercase small mb-3">Pablo Dev</p> <p class="text-secondary small lh-lg mb-4"> Sviluppo Software Web &amp; AI Integration <!-- Freelance Developer &amp; AI Specialist.<br>
+						Sviluppo Web App e integro l'AI nel tuo business. --> </p> <div class="d-flex gap-3"> <a href="https://github.com/pablodevhub" class="text-secondary"><i class="bi bi-github fs-6"></i></a> <a href="https://www.youtube.com/@pablodev-yt" class="text-secondary"><i class="bi bi-youtube fs-6"></i></a>  <a href="mailto:pablodev@outlook.it" class="text-secondary"><i class="bi bi-envelope fs-6"></i></a> </div> </div> <div class="col-6 col-lg-2 offset-lg-4"> <p class="text-uppercase fw-semibold mb-3 small">Navigazione</p> <div class="d-flex flex-column gap-2"> <a href="/" class="text-secondary text-decoration-none small">Home</a> <a href="/blog" class="text-secondary text-decoration-none small">Blog</a>
+						<a href="/progetti" class="text-secondary text-decoration-none small">Progetti</a>  </div> </div> <!-- <div class="col-6 col-lg-2">
+					<p class="text-uppercase fw-semibold mb-3 small">Servizi</p>
+					<div class="d-flex flex-column gap-2">
+					<a href="#" class="text-secondary text-decoration-none small">Siti Vetrina</a>
+					<a href="#" class="text-secondary text-decoration-none small">Web App</a>
+					<a href="#" class="text-secondary text-decoration-none small">Integrazione AI</a>
+					<a href="#" class="text-secondary text-decoration-none small">Consulenza</a>
+					</div>
+				</div> --> <div class="col-6 col-lg-2"> <p class="text-uppercase fw-semibold mb-3 small">Legale</p> <div class="d-flex flex-column gap-2"> <a href="/privacy-policy" class="text-secondary text-decoration-none small">Privacy Policy</a> <a href="/cookie-policy" class="text-secondary text-decoration-none small">Cookie Policy</a> </div> </div> </div> <div class="border-top border-secondary-subtle pt-4 d-flex justify-content-between align-items-center flex-wrap gap-2"> <span class="text-secondary small">&copy; 2026 Pablo. Tutti i diritti riservati.</span> <span class="text-secondary small">P.IVA 10407410967</span> </div> </div> </footer> <!-- <footer class="bg-body-tertiary border-top py-4 mt-5">
+		<div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-body-secondary small">
+		<span>&copy; {new Date().getFullYear()} {SITE_CONFIG.title}. Tutti i diritti riservati.</span>
+		<div class="d-flex gap-3">
+			<a href={`mailto:${SITE_CONFIG.email}`} class="text-body-secondary text-decoration-none">
+				<i class="bi bi-envelope-fill me-1"></i>{SITE_CONFIG.email}
+			</a>
+			<a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noopener noreferrer" class="text-body-secondary text-decoration-none">
+				<i class="bi bi-youtube me-1"></i>YouTube
+			</a>
+		</div>
+		</div>
+	</footer> --> <script src="/scripts/cookie-consent.js" defer></script> <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> --> <script type="module" src="/_astro/BaseLayout.astro_astro_type_script_index_0_lang.GtM1sxkV.js"></script> <script src="/scripts/main.js" defer></script> </body> </html>

@@ -1,0 +1,681 @@
+<!DOCTYPE html><html lang="it" data-bs-theme="dark"> <head><!-- 
+		preconnect Ottimizza le connessioni esterne 
+		I file di Bootstrap vengono caricati da cdn.jsdelivr.net. Il browser perde tempo a "cercare" dove si trova questo server (DNS lookup) e a stabilire una connessione sicura.
+		Soluzione: Aggiungi queste due righe in cima al tuo <head>, prima di ogni altra cosa: 
+	--><link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="dns-prefetch" href="https://cdn.jsdelivr.net"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v6.1.3"><title>Compilare un ambiente LAMP da sorgente su Linux (RHEL e Debian/Ubuntu) | Pablo Dev</title><meta name="description" content="Guida pratica per compilare e installare Apache, PHP e MariaDB da sorgente su Linux, senza privilegi root, per ambienti RHEL-based (Oracle Linux 10, AlmaLinux 10, Rocky Linux 10) e Debian/Ubuntu (Debian 13, Ubuntu 26)."><link rel="canonical" href="https://pablodev.pubcloud.net/blog/0011-lamp-compilato-linux/"><meta property="og:title" content="Compilare un ambiente LAMP da sorgente su Linux (RHEL e Debian/Ubuntu) | Pablo Dev"><meta property="og:description" content="Guida pratica per compilare e installare Apache, PHP e MariaDB da sorgente su Linux, senza privilegi root, per ambienti RHEL-based (Oracle Linux 10, AlmaLinux 10, Rocky Linux 10) e Debian/Ubuntu (Debian 13, Ubuntu 26)."><meta property="og:url" content="https://pablodev.pubcloud.net/blog/0011-lamp-compilato-linux/"><meta property="og:type" content="article"><meta property="og:site_name" content="Pablo Dev"><meta property="og:image" content="https://pablodev.pubcloud.net/images/blog/lamp-console-linux.webp"><meta property="article:published_time" content="2026-05-09"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Compilare un ambiente LAMP da sorgente su Linux (RHEL e Debian/Ubuntu) | Pablo Dev"><meta name="twitter:description" content="Guida pratica per compilare e installare Apache, PHP e MariaDB da sorgente su Linux, senza privilegi root, per ambienti RHEL-based (Oracle Linux 10, AlmaLinux 10, Rocky Linux 10) e Debian/Ubuntu (Debian 13, Ubuntu 26)."><meta name="twitter:image" content="https://pablodev.pubcloud.net/images/blog/lamp-console-linux.webp"><meta name="google-site-verification" content="BxY2GMt1bMEuHSSFjgpTSqk-jNTcWCi_QyK-K0W6ncU">
+		<meta name="msvalidate.01" content="459786BEF673C99279D8774CC75C50E0"><link rel="sitemap" href="/sitemap-index.xml"><link rel="icon" href="data:,"><!-- blank favicon --><!-- Bootstrap Icons --><link rel="stylesheet" href="/vendors/bootstrap-icons-1.13.1/bootstrap-icons.min.css"><!-- stili nel file main.scss importati come ultimi --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","name":"Pablo Dev","url":"https://pablodev.pubcloud.net","description":"Sviluppo Software Web & AI Integration","datePublished":"2026-05-09","author":{"@type":"Person","name":"Pablo"}}</script><link rel="stylesheet" href="/_astro/BaseLayout.BMuug6mF.css"></head> <body> <nav class="navbar navbar-expand-lg sticky-top bg-body-tertiary border-bottom"> <div class="container"> <a class="navbar-brand fw-bold" href="/">Pablo Dev</a> <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button> <div class="collapse navbar-collapse" id="navbarNav"> <ul class="navbar-nav ms-auto gap-2"> <li class="nav-item"> <a class="nav-link" href="/">Home</a> </li> <li class="nav-item"><a class="nav-link" href="/blog">Blog</a></li>
+						<li class="nav-item"><a class="nav-link" href="/progetti">Progetti</a></li>
+						<li class="nav-item"> <a class="nav-link" href="https://www.youtube.com/@pablodev-yt" target="_blank" rel="noopener noreferrer"> <i class="bi bi-youtube me-1"></i>YouTube
+</a> </li>  </ul> </div> </div> </nav> <main>  <article class="container py-5"> <div class="mb-4"> <a href="/blog" class="btn btn-outline-secondary btn-sm"> <i class="bi bi-arrow-left me-1"></i>Tutti gli articoli
+</a> </div> <h1 class="mb-2 text-center">Compilare un ambiente LAMP da sorgente su Linux (RHEL e Debian/Ubuntu)</h1> <p class="text-body-secondary mb-4 text-center"> <i class="bi bi-calendar3 me-1"></i> <time datetime="2026-05-09">9 maggio 2026</time> </p> <div class="row justify-content-center"> <div class="col-lg-8"> <img src="/images/blog/lamp-console-linux.webp" alt="Lamp Console Linux" class="article-cover rounded mb-4"> <nav id="toc-container" class="card bg-body-tertiary border mt-4 mb-5 p-3" aria-label="Indice dei contenuti"> <h2 class="h4 text-uppercase text-body-secondary mb-3"> <i class="bi bi-list-ul me-1"></i> Indice
+</h2> <ul class="toc-list" id="toc-list"></ul> </nav> <div id="article-content"> <p>Questa guida descrive come compilare e installare un ambiente LAMP (Apache, MariaDB, PHP) da sorgente su Linux, in modalità <strong>non root</strong> e <strong>portabile</strong>: tutti i componenti vengono installati in una directory dedicata, senza toccare i pacchetti di sistema.</p>
+<p>La procedura è divisa in due sezioni:</p>
+<ul>
+<li><strong>RHEL-based</strong>: Oracle Linux 10, AlmaLinux 10, Rocky Linux 10</li>
+<li><strong>Debian/Ubuntu</strong>: Debian 13, Ubuntu 26</li>
+</ul>
+<p>Le versioni di riferimento sono:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Componente</th><th>Versione</th></tr></thead><tbody><tr><td>Apache</td><td>2.4.65</td></tr><tr><td>PHP</td><td>8.4.12</td></tr><tr><td>MariaDB</td><td>12.1.1</td></tr></tbody></table>
+<h2 id="sezione-1--rhel-based-oracle-linux-10-almalinux-10-rocky-linux-10">Sezione 1 — RHEL-based (Oracle Linux 10, AlmaLinux 10, Rocky Linux 10)</h2>
+<h3 id="variabili-di-configurazione">Variabili di configurazione</h3>
+<pre><code class="language-bash">export LAMP_ROOT="/mnt/local1tb/Alma10/lamp"
+export SITIWEB_ROOT="/mnt/local1tb/Alma10/sitiweb"
+export TEMP_BUILD="/mnt/local2tb/temp"
+export APACHE_PORT="8080"
+export MARIADB_PORT="3307"
+export APACHE_VERSION="2.4.65"
+export PHP_VERSION="8.4.12"
+export MARIADB_VERSION="12.1.1"
+export USER_LAMP=$(whoami)
+</code></pre>
+<h3 id="dipendenze-di-sistema">Dipendenze di sistema</h3>
+<pre><code class="language-bash"># Creazione directory
+mkdir -p $LAMP_ROOT $SITIWEB_ROOT $TEMP_BUILD
+mkdir -p $LAMP_ROOT/apache-$APACHE_VERSION \
+         $LAMP_ROOT/php-$PHP_VERSION \
+         $LAMP_ROOT/mariadb-$MARIADB_VERSION
+
+# Installazione dipendenze
+sudo dnf groupinstall "Development Tools"
+sudo dnf install wget cmake pcre2-devel expat-devel openssl-devel \
+    libxml2-devel sqlite-devel oniguruma-devel libcurl-devel \
+    libjpeg-devel libpng-devel freetype-devel gmp-devel \
+    libzip-devel readline-devel ncurses-devel boost-devel \
+    bison flex re2c libxslt-devel perl \
+    gnutls-devel gnutls-c++ gnutls-dane gnutls-utils
+</code></pre>
+<h3 id="apache">Apache</h3>
+<pre><code class="language-bash">cd $TEMP_BUILD
+
+# Download Apache, APR e APR-util
+wget https://archive.apache.org/dist/httpd/httpd-$APACHE_VERSION.tar.gz
+wget https://archive.apache.org/dist/apr/apr-1.7.5.tar.gz
+wget https://archive.apache.org/dist/apr/apr-util-1.6.3.tar.gz
+
+# Estrazione
+tar xzf httpd-$APACHE_VERSION.tar.gz
+tar xzf apr-1.7.5.tar.gz
+tar xzf apr-util-1.6.3.tar.gz
+
+# Copia APR nelle directory di Apache (compilazione integrata)
+cp -r apr-1.7.5 httpd-$APACHE_VERSION/srclib/apr
+cp -r apr-util-1.6.3 httpd-$APACHE_VERSION/srclib/apr-util
+
+cd httpd-$APACHE_VERSION
+
+./configure \
+    --prefix=$LAMP_ROOT/apache-$APACHE_VERSION \
+    --enable-rewrite \
+    --enable-ssl \
+    --enable-deflate \
+    --enable-headers \
+    --enable-expires \
+    --enable-mime-magic \
+    --enable-info \
+    --enable-status \
+    --enable-userdir \
+    --enable-vhost-alias \
+    --enable-dir \
+    --enable-alias \
+    --enable-so \
+    --enable-proxy \
+    --enable-proxy-fcgi \
+    --enable-shared=max \
+    --with-included-apr
+
+make -j$(nproc)
+make install
+</code></pre>
+<p>Individua il percorso di <code>apxs</code>, che servirà per la compilazione di PHP:</p>
+<pre><code class="language-bash">find $LAMP_ROOT/apache-$APACHE_VERSION -name "apxs" -type f
+</code></pre>
+<h3 id="php">PHP</h3>
+<pre><code class="language-bash">cd $TEMP_BUILD
+
+wget https://www.php.net/distributions/php-$PHP_VERSION.tar.gz
+tar xzf php-$PHP_VERSION.tar.gz
+cd php-$PHP_VERSION
+
+./configure \
+    --prefix=$LAMP_ROOT/php-$PHP_VERSION \
+    --with-apxs2=$LAMP_ROOT/apache-$APACHE_VERSION/bin/apxs \
+    --enable-fpm \
+    --with-fpm-user=$USER_LAMP \
+    --with-fpm-group=$USER_LAMP \
+    --with-config-file-path=$LAMP_ROOT/php-$PHP_VERSION/lib \
+    --enable-mbstring \
+    --enable-bcmath \
+    --enable-pcntl \
+    --enable-ftp \
+    --enable-exif \
+    --enable-calendar \
+    --enable-opcache \
+    --enable-pdo \
+    --enable-mysqlnd \
+    --with-mysqli=mysqlnd \
+    --with-pdo-mysql=mysqlnd \
+    --with-curl \
+    --with-libxml \
+    --with-gmp \
+    --with-zlib \
+    --with-bz2=shared \
+    --with-jpeg \
+    --with-freetype \
+    --enable-gd \
+    --with-openssl \
+    --with-gettext \
+    --with-xsl \
+    --enable-soap \
+    --enable-intl \
+    --with-readline \
+    --enable-sockets \
+    --enable-zip
+
+make -j$(nproc)
+make install
+
+cp php.ini-development $LAMP_ROOT/php-$PHP_VERSION/lib/php.ini
+</code></pre>
+<h3 id="mariadb">MariaDB</h3>
+<pre><code class="language-bash">cd $TEMP_BUILD
+
+wget https://downloads.mariadb.org/rest-api/mariadb/$MARIADB_VERSION/mariadb-$MARIADB_VERSION.tar.gz
+tar xzf mariadb-$MARIADB_VERSION.tar.gz
+cd mariadb-$MARIADB_VERSION
+
+cmake . \
+    -DCMAKE_INSTALL_PREFIX=$LAMP_ROOT/mariadb-$MARIADB_VERSION \
+    -DMYSQL_DATADIR=$LAMP_ROOT/mariadb-$MARIADB_VERSION/data \
+    -DMYSQL_UNIX_ADDR=$LAMP_ROOT/mariadb-$MARIADB_VERSION/mysql.sock \
+    -DMYSQL_USER=$USER_LAMP \
+    -DWITH_INNOBASE_STORAGE_ENGINE=1 \
+    -DWITH_ARCHIVE_STORAGE_ENGINE=1 \
+    -DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
+    -DWITH_READLINE=1 \
+    -DWITH_SSL=system \
+    -DWITH_ZLIB=system \
+    -DDEFAULT_CHARSET=utf8mb4 \
+    -DDEFAULT_COLLATION=utf8mb4_unicode_ci
+
+make -j$(nproc)
+make install
+</code></pre>
+<h2 id="sezione-2--debianubuntu-debian-13-ubuntu-26">Sezione 2 — Debian/Ubuntu (Debian 13, Ubuntu 26)</h2>
+<h3 id="variabili-di-configurazione-1">Variabili di configurazione</h3>
+<pre><code class="language-bash">export LAMP_ROOT="/mnt/local1tb/Debian13/lamp"
+export SITES_ROOT="/mnt/local1tb/Debian13/sitiweb"
+export SESSION_ROOT="${LAMP_ROOT}/sessions_data"
+export BUILD_DIR="/mnt/local2tb/temp"
+export APACHE_VERSION="2.4.65"
+export PHP_VERSION="8.4.12"
+export MARIADB_VERSION="12.1.1"
+export APACHE_PORT="8080"
+export MARIADB_PORT="3307"
+export USER_NAME=$(whoami)
+</code></pre>
+<h3 id="dipendenze-di-sistema-1">Dipendenze di sistema</h3>
+<pre><code class="language-bash"># Creazione directory
+mkdir -p $LAMP_ROOT $SITES_ROOT $BUILD_DIR $SESSION_ROOT
+mkdir -p $LAMP_ROOT/apache-$APACHE_VERSION \
+         $LAMP_ROOT/php-$PHP_VERSION \
+         $LAMP_ROOT/mariadb-$MARIADB_VERSION
+
+# Installazione dipendenze
+sudo apt update
+sudo apt install -y build-essential wget curl git cmake \
+    libssl-dev libexpat1-dev libpcre2-dev zlib1g-dev \
+    libxml2-dev libbz2-dev libcurl4-openssl-dev \
+    libjpeg-dev libpng-dev libfreetype6-dev \
+    libonig-dev libzip-dev libsqlite3-dev \
+    libreadline-dev libncurses-dev pkg-config \
+    bison flex libgnutls28-dev libgmp-dev \
+    libxslt1-dev re2c
+</code></pre>
+<h3 id="apache-1">Apache</h3>
+<p>In Debian/Ubuntu le librerie APR di sistema sono sufficienti, ma per garantire compatibilità si consiglia di compilarle integrate come per RHEL. In alternativa, con i pacchetti <code>libapr1-dev</code> e <code>libaprutil1-dev</code> già installati, è possibile omettere <code>--with-included-apr</code>.</p>
+<pre><code class="language-bash">cd $BUILD_DIR
+
+wget https://archive.apache.org/dist/httpd/httpd-${APACHE_VERSION}.tar.gz
+wget https://archive.apache.org/dist/apr/apr-1.7.5.tar.gz
+wget https://archive.apache.org/dist/apr/apr-util-1.6.3.tar.gz
+
+tar xzf httpd-${APACHE_VERSION}.tar.gz
+tar xzf apr-1.7.5.tar.gz
+tar xzf apr-util-1.6.3.tar.gz
+
+cp -r apr-1.7.5 httpd-${APACHE_VERSION}/srclib/apr
+cp -r apr-util-1.6.3 httpd-${APACHE_VERSION}/srclib/apr-util
+
+cd httpd-${APACHE_VERSION}
+
+./configure \
+    --prefix=${LAMP_ROOT}/apache-${APACHE_VERSION} \
+    --enable-rewrite \
+    --enable-ssl \
+    --enable-deflate \
+    --enable-headers \
+    --enable-expires \
+    --enable-mime-magic \
+    --enable-info \
+    --enable-status \
+    --enable-cgi \
+    --enable-vhost-alias \
+    --enable-negotiation \
+    --enable-dir \
+    --enable-alias \
+    --enable-so \
+    --enable-proxy \
+    --enable-proxy-fcgi \
+    --enable-userdir \
+    --enable-unique-id \
+    --with-included-apr
+
+make -j$(nproc)
+make install
+
+cd $BUILD_DIR
+rm -rf httpd-${APACHE_VERSION} httpd-${APACHE_VERSION}.tar.gz \
+       apr-1.7.5 apr-1.7.5.tar.gz \
+       apr-util-1.6.3 apr-util-1.6.3.tar.gz
+</code></pre>
+<h3 id="php-1">PHP</h3>
+<pre><code class="language-bash">cd $BUILD_DIR
+
+wget https://www.php.net/distributions/php-${PHP_VERSION}.tar.gz
+tar xzf php-${PHP_VERSION}.tar.gz
+cd php-${PHP_VERSION}
+
+./configure \
+    --prefix=${LAMP_ROOT}/php-${PHP_VERSION} \
+    --enable-fpm \
+    --with-fpm-user=${USER_NAME} \
+    --with-fpm-group=${USER_NAME} \
+    --with-config-file-path=${LAMP_ROOT}/php-${PHP_VERSION}/etc \
+    --with-config-file-scan-dir=${LAMP_ROOT}/php-${PHP_VERSION}/etc/conf.d \
+    --enable-bcmath \
+    --enable-calendar \
+    --enable-exif \
+    --enable-ftp \
+    --enable-gd \
+    --with-freetype \
+    --with-jpeg \
+    --enable-intl \
+    --enable-mbstring \
+    --with-mysqli=mysqlnd \
+    --enable-mysqlnd \
+    --with-pdo-mysql=mysqlnd \
+    --enable-opcache \
+    --with-openssl \
+    --enable-pcntl \
+    --enable-posix \
+    --enable-session \
+    --enable-shmop \
+    --enable-soap \
+    --enable-sockets \
+    --with-sodium \
+    --enable-sysvmsg \
+    --enable-sysvsem \
+    --enable-sysvshm \
+    --with-curl \
+    --with-zip \
+    --with-zlib \
+    --with-gmp \
+    --with-gettext \
+    --with-xsl \
+    --enable-fileinfo
+
+make -j$(nproc)
+make install
+
+cp php.ini-development ${LAMP_ROOT}/php-${PHP_VERSION}/etc/php.ini
+
+cd $BUILD_DIR
+rm -rf php-${PHP_VERSION} php-${PHP_VERSION}.tar.gz
+</code></pre>
+<h3 id="mariadb-1">MariaDB</h3>
+<p>Su Debian/Ubuntu si scarica il sorgente da GitHub per maggiore affidabilità:</p>
+<pre><code class="language-bash">cd $BUILD_DIR
+
+git clone --branch mariadb-${MARIADB_VERSION} \
+    https://github.com/MariaDB/server.git mariadb-${MARIADB_VERSION}
+cd mariadb-${MARIADB_VERSION}
+git submodule update --init --recursive
+
+mkdir build &#x26;&#x26; cd build
+
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=${LAMP_ROOT}/mariadb-${MARIADB_VERSION} \
+    -DMYSQL_DATADIR=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/data \
+    -DMYSQL_UNIX_ADDR=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/mysql.sock \
+    -DDEFAULT_CHARSET=utf8mb4 \
+    -DDEFAULT_COLLATION=utf8mb4_unicode_ci \
+    -DWITH_INNOBASE_STORAGE_ENGINE=1 \
+    -DWITH_ARCHIVE_STORAGE_ENGINE=1 \
+    -DWITH_BLACKHOLE_STORAGE_ENGINE=1 \
+    -DWITH_PERFSCHEMA_STORAGE_ENGINE=1 \
+    -DWITH_READLINE=1 \
+    -DWITH_SSL=system \
+    -DWITH_ZLIB=system
+
+make -j$(nproc)
+make install
+
+cd $BUILD_DIR
+rm -rf mariadb-${MARIADB_VERSION}
+</code></pre>
+<h2 id="configurazione-comune">Configurazione comune</h2>
+<p>Le sezioni seguenti si applicano a entrambe le distribuzioni. Adatta i percorsi e le variabili alla tua distribuzione (<code>$LAMP_ROOT</code> / <code>$SITES_ROOT</code> o <code>$SITIWEB_ROOT</code>, <code>$USER_LAMP</code> / <code>$USER_NAME</code>).</p>
+<blockquote>
+<p>Nelle sezioni seguenti viene usata la nomenclatura Debian/Ubuntu (<code>$SITES_ROOT</code>, <code>$USER_NAME</code>). Per RHEL sostituisci con <code>$SITIWEB_ROOT</code> e <code>$USER_LAMP</code>.</p>
+</blockquote>
+<h3 id="configurazione-apache">Configurazione Apache</h3>
+<pre><code class="language-bash"># Backup
+cp ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf \
+   ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf.backup
+
+# Porta e ServerName
+sed -i "s/Listen 80/Listen ${APACHE_PORT}/" \
+    ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf
+sed -i "s/#ServerName www.example.com:80/ServerName localhost:${APACHE_PORT}/" \
+    ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf
+
+# Utente
+sed -i "s/User daemon/User ${USER_NAME}/" \
+    ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf
+sed -i "s/Group daemon/Group ${USER_NAME}/" \
+    ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf
+
+# Moduli
+sed -i 's/#LoadModule rewrite_module/LoadModule rewrite_module/' \
+    ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf
+sed -i 's/#LoadModule deflate_module/LoadModule deflate_module/' \
+    ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf
+sed -i 's/#LoadModule expires_module/LoadModule expires_module/' \
+    ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf
+sed -i 's/#LoadModule headers_module/LoadModule headers_module/' \
+    ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf
+
+# Abilita virtual hosts
+sed -i 's|#Include conf/extra/httpd-vhosts.conf|Include conf/extra/httpd-vhosts.conf|' \
+    ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/httpd.conf
+</code></pre>
+<h3 id="configurazione-php">Configurazione PHP</h3>
+<pre><code class="language-bash"># PHP-FPM
+cp ${LAMP_ROOT}/php-${PHP_VERSION}/etc/php-fpm.conf.default \
+   ${LAMP_ROOT}/php-${PHP_VERSION}/etc/php-fpm.conf
+cp ${LAMP_ROOT}/php-${PHP_VERSION}/etc/php-fpm.d/www.conf.default \
+   ${LAMP_ROOT}/php-${PHP_VERSION}/etc/php-fpm.d/www.conf
+
+sed -i "s/user = .*/user = ${USER_NAME}/" \
+    ${LAMP_ROOT}/php-${PHP_VERSION}/etc/php-fpm.d/www.conf
+sed -i "s/group = .*/group = ${USER_NAME}/" \
+    ${LAMP_ROOT}/php-${PHP_VERSION}/etc/php-fpm.d/www.conf
+sed -i "s|listen = .*|listen = 127.0.0.1:9000|" \
+    ${LAMP_ROOT}/php-${PHP_VERSION}/etc/php-fpm.d/www.conf
+
+# Limiti php.ini
+PHP_INI="${LAMP_ROOT}/php-${PHP_VERSION}/etc/php.ini"
+sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 100M/'   $PHP_INI
+sed -i 's/post_max_size = 8M/post_max_size = 100M/'               $PHP_INI
+sed -i 's/max_execution_time = 30/max_execution_time = 300/'      $PHP_INI
+sed -i 's/max_input_time = 60/max_input_time = 300/'              $PHP_INI
+sed -i 's/memory_limit = 128M/memory_limit = 512M/'               $PHP_INI
+sed -i 's/output_buffering = 4096/output_buffering = On/'         $PHP_INI
+
+# Session save path
+echo "session.save_path = \"${SESSION_ROOT}\"" >> $PHP_INI
+</code></pre>
+<h3 id="configurazione-mariadb">Configurazione MariaDB</h3>
+<pre><code class="language-bash"># Inizializzazione database
+${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/scripts/mariadb-install-db \
+    --user=${USER_NAME} \
+    --basedir=${LAMP_ROOT}/mariadb-${MARIADB_VERSION} \
+    --datadir=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/data
+
+# my.cnf
+cat > ${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/my.cnf &#x3C;&#x3C; EOF
+[mysqld]
+basedir=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}
+datadir=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/data
+socket=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/mysql.sock
+port=${MARIADB_PORT}
+user=${USER_NAME}
+bind-address=127.0.0.1
+
+[mysql]
+socket=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/mysql.sock
+
+[client]
+socket=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/mysql.sock
+port=${MARIADB_PORT}
+EOF
+</code></pre>
+<p>Avvia MariaDB temporaneamente per impostare la password di root:</p>
+<pre><code class="language-bash">${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/bin/mariadbd-safe \
+    --defaults-file=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/my.cnf \
+    --user=${USER_NAME} &#x26;
+
+sleep 5
+
+# Imposta password root (premi Invio se chiede la password attuale)
+${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/bin/mariadb -u root \
+    --socket=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/mysql.sock \
+    -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root'; FLUSH PRIVILEGES;"
+
+# Procedura guidata di sicurezza
+${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/bin/mariadb-secure-installation \
+    --socket=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/mysql.sock
+
+# Ferma MariaDB
+${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/bin/mariadb-admin \
+    --socket=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/mysql.sock \
+    -u root -p shutdown
+</code></pre>
+<h3 id="virtual-host-e-siti">Virtual Host e siti</h3>
+<pre><code class="language-bash"># Directory siti
+mkdir -p ${SITES_ROOT}/localhost
+mkdir -p ${SITES_ROOT}/pma.local
+
+# File di test
+echo "&#x3C;?php phpinfo(); ?>" > ${SITES_ROOT}/localhost/info.php
+echo "&#x3C;h1>Localhost&#x3C;/h1>" > ${SITES_ROOT}/localhost/index.html
+
+# Backup e configurazione virtual hosts
+cp ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/extra/httpd-vhosts.conf \
+   ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/extra/httpd-vhosts.conf.backup
+
+cat > ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/extra/httpd-vhosts.conf &#x3C;&#x3C; EOF
+&#x3C;VirtualHost *:${APACHE_PORT}>
+    ServerName localhost
+    DocumentRoot "${SITES_ROOT}/localhost"
+    DirectoryIndex index.php index.html
+    &#x3C;Directory "${SITES_ROOT}/localhost">
+        AllowOverride All
+        Require all granted
+        &#x3C;FilesMatch \.php$>
+            SetHandler "proxy:fcgi://127.0.0.1:9000"
+        &#x3C;/FilesMatch>
+    &#x3C;/Directory>
+    ErrorLog "logs/localhost_error.log"
+    CustomLog "logs/localhost_access.log" common
+&#x3C;/VirtualHost>
+
+&#x3C;VirtualHost *:${APACHE_PORT}>
+    ServerName pma.local
+    DocumentRoot "${SITES_ROOT}/pma.local"
+    DirectoryIndex index.php
+    &#x3C;Directory "${SITES_ROOT}/pma.local">
+        AllowOverride All
+        Require all granted
+        &#x3C;FilesMatch \.php$>
+            SetHandler "proxy:fcgi://127.0.0.1:9000"
+        &#x3C;/FilesMatch>
+    &#x3C;/Directory>
+    ErrorLog "logs/pma_error.log"
+    CustomLog "logs/pma_access.log" common
+&#x3C;/VirtualHost>
+EOF
+
+# Aggiunta al file hosts
+echo "127.0.0.1 pma.local" | sudo tee -a /etc/hosts
+</code></pre>
+<p>Per aggiungere un nuovo sito in seguito:</p>
+<pre><code class="language-bash"># Crea la directory
+mkdir -p ${SITES_ROOT}/miosito.local
+
+# Aggiungi il virtual host
+cat >> ${LAMP_ROOT}/apache-${APACHE_VERSION}/conf/extra/httpd-vhosts.conf &#x3C;&#x3C; EOF
+
+&#x3C;VirtualHost *:${APACHE_PORT}>
+    ServerName miosito.local
+    DocumentRoot "${SITES_ROOT}/miosito.local"
+    DirectoryIndex index.php index.html
+    &#x3C;Directory "${SITES_ROOT}/miosito.local">
+        AllowOverride All
+        Require all granted
+        &#x3C;FilesMatch \.php$>
+            SetHandler "proxy:fcgi://127.0.0.1:9000"
+        &#x3C;/FilesMatch>
+    &#x3C;/Directory>
+    ErrorLog "logs/miosito_error.log"
+    CustomLog "logs/miosito_access.log" common
+&#x3C;/VirtualHost>
+EOF
+
+# Aggiunta al file hosts
+echo "127.0.0.1 miosito.local" | sudo tee -a /etc/hosts
+</code></pre>
+<h3 id="phpmyadmin">phpMyAdmin</h3>
+<pre><code class="language-bash">cd ${SITES_ROOT}/pma.local
+
+wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz
+tar -xzf phpMyAdmin-latest-all-languages.tar.gz --strip-components=1
+rm phpMyAdmin-latest-all-languages.tar.gz
+
+cp config.sample.inc.php config.inc.php
+
+# Configura host e porta
+sed -i "s/\['host'\] = 'localhost'/['host'] = '127.0.0.1'/" config.inc.php
+sed -i "s/\['port'\] = ''/['port'] = '${MARIADB_PORT}'/" config.inc.php
+
+# Genera e imposta blowfish_secret
+BFSECRET=$(openssl rand -base64 32)
+sed -i "s|\(\$cfg\['blowfish_secret'\] = '\)|\1${BFSECRET}|" config.inc.php
+
+# Directory temporanea
+mkdir -p tmp &#x26;&#x26; chmod 777 tmp
+</code></pre>
+<p>Per il login automatico (opzionale), aggiungi nel <code>config.inc.php</code>:</p>
+<pre><code class="language-php">$cfg['Servers'][$i]['auth_type'] = 'config';
+$cfg['Servers'][$i]['user'] = 'root';
+$cfg['Servers'][$i]['password'] = 'root';
+$cfg['Servers'][$i]['AllowNoPassword'] = false;
+</code></pre>
+<h3 id="script-di-avvio-e-stop">Script di avvio e stop</h3>
+<pre><code class="language-bash">cat > ${LAMP_ROOT}/start_lamp.sh &#x3C;&#x3C; 'EOF'
+#!/bin/bash
+LAMP_ROOT="/mnt/local1tb/Debian13/lamp"
+APACHE_VERSION="2.4.65"
+PHP_VERSION="8.4.12"
+MARIADB_VERSION="12.1.1"
+APACHE_PORT="8080"
+MARIADB_PORT="3307"
+USER_NAME=$(whoami)
+
+export PATH=${LAMP_ROOT}/apache-${APACHE_VERSION}/bin:${LAMP_ROOT}/php-${PHP_VERSION}/bin:${LAMP_ROOT}/php-${PHP_VERSION}/sbin:${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/bin:$PATH
+
+echo "Avvio MariaDB..."
+${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/bin/mariadbd-safe \
+    --defaults-file=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/my.cnf \
+    --user=${USER_NAME} &#x26;
+sleep 5
+
+echo "Avvio PHP-FPM..."
+${LAMP_ROOT}/php-${PHP_VERSION}/sbin/php-fpm \
+    --fpm-config ${LAMP_ROOT}/php-${PHP_VERSION}/etc/php-fpm.conf &#x26;
+sleep 2
+
+echo "Avvio Apache..."
+${LAMP_ROOT}/apache-${APACHE_VERSION}/bin/httpd -D FOREGROUND &#x26;
+
+echo "LAMP avviato:"
+echo "  http://localhost:${APACHE_PORT}"
+echo "  http://pma.local:${APACHE_PORT}"
+echo "  MariaDB porta: ${MARIADB_PORT}"
+wait
+EOF
+
+cat > ${LAMP_ROOT}/stop_lamp.sh &#x3C;&#x3C; 'EOF'
+#!/bin/bash
+LAMP_ROOT="/mnt/local1tb/Debian13/lamp"
+MARIADB_VERSION="12.1.1"
+
+echo "Arresto Apache..."
+pkill -f "httpd -D FOREGROUND"
+
+echo "Arresto PHP-FPM..."
+pkill -f "php-fpm"
+
+echo "Arresto MariaDB..."
+${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/bin/mariadb-admin \
+    --socket=${LAMP_ROOT}/mariadb-${MARIADB_VERSION}/mysql.sock \
+    -u root -p shutdown
+
+echo "LAMP arrestato."
+EOF
+
+chmod +x ${LAMP_ROOT}/start_lamp.sh
+chmod +x ${LAMP_ROOT}/stop_lamp.sh
+</code></pre>
+<p>Avvio e stop:</p>
+<pre><code class="language-bash">${LAMP_ROOT}/start_lamp.sh
+${LAMP_ROOT}/stop_lamp.sh
+</code></pre>
+<h2 id="wordpress">WordPress</h2>
+<p>Nel file <code>wp-config.php</code> imposta l’host del database nel formato <code>127.0.0.1:PORTA</code>:</p>
+<pre><code class="language-php">define( 'DB_HOST', '127.0.0.1:3307' );
+</code></pre>
+<p>Aggiungi anche queste costanti utili per lo sviluppo locale:</p>
+<pre><code class="language-php">define('FS_METHOD', 'direct');
+define('AUTOMATIC_UPDATER_DISABLED', true);
+define('WP_POST_REVISIONS', 5);
+define('ALLOW_UNFILTERED_UPLOADS', true);
+</code></pre>
+<p>Per la gestione delle immagini, se ImageMagick non è disponibile, forza l’uso di GD:</p>
+<pre><code class="language-php">define('WP_IMAGE_EDITOR_GD', true);
+</code></pre>
+<h2 id="imagemagick-opzionale">ImageMagick (opzionale)</h2>
+<p>Se hai bisogno dell’estensione <code>imagick</code> per PHP (ad esempio per WordPress), compilala da sorgente:</p>
+<pre><code class="language-bash"># Dipendenze (Debian/Ubuntu)
+sudo apt install -y libmagickwand-dev libmagickcore-dev
+
+# RHEL
+# sudo dnf install ImageMagick-devel
+
+cd $BUILD_DIR
+git clone https://github.com/Imagick/imagick.git
+cd imagick
+
+export PATH="${LAMP_ROOT}/php-${PHP_VERSION}/bin:$PATH"
+${LAMP_ROOT}/php-${PHP_VERSION}/bin/phpize
+./configure --with-php-config=${LAMP_ROOT}/php-${PHP_VERSION}/bin/php-config
+make -j$(nproc)
+make install
+
+echo "extension=imagick.so" >> ${LAMP_ROOT}/php-${PHP_VERSION}/etc/php.ini
+
+# Riavvia il LAMP con lo script stop/start
+cd $BUILD_DIR &#x26;&#x26; rm -rf imagick
+</code></pre>
+<h2 id="note-sulla-portabilità">Note sulla portabilità</h2>
+<p>Per spostare l’ambiente su un’altra macchina della stessa famiglia di distribuzioni:</p>
+<ol>
+<li>Copia la directory <code>$LAMP_ROOT</code> sulla nuova macchina</li>
+<li>Copia la directory dei siti web</li>
+<li>Installa le stesse dipendenze runtime</li>
+<li>Aggiorna i percorsi negli script se le directory di destinazione differiscono</li>
+<li>Lancia <code>start_lamp.sh</code></li>
+</ol> </div> </div> </div> </article>  </main> <!-- ══ FOOTER ══════════════════════════════════════════════════════ --> <footer class="border-top border-secondary-subtle py-5 mt-5"> <div class="container"> <div class="row gy-4 pb-5"> <div class="col-lg-4"> <p class="fw-semibold text-uppercase small mb-3">Pablo Dev</p> <p class="text-secondary small lh-lg mb-4"> Sviluppo Software Web &amp; AI Integration <!-- Freelance Developer &amp; AI Specialist.<br>
+						Sviluppo Web App e integro l'AI nel tuo business. --> </p> <div class="d-flex gap-3"> <a href="https://github.com/pablodevhub" class="text-secondary"><i class="bi bi-github fs-6"></i></a> <a href="https://www.youtube.com/@pablodev-yt" class="text-secondary"><i class="bi bi-youtube fs-6"></i></a>  <a href="mailto:pablodev@outlook.it" class="text-secondary"><i class="bi bi-envelope fs-6"></i></a> </div> </div> <div class="col-6 col-lg-2 offset-lg-4"> <p class="text-uppercase fw-semibold mb-3 small">Navigazione</p> <div class="d-flex flex-column gap-2"> <a href="/" class="text-secondary text-decoration-none small">Home</a> <a href="/blog" class="text-secondary text-decoration-none small">Blog</a>
+						<a href="/progetti" class="text-secondary text-decoration-none small">Progetti</a>  </div> </div> <!-- <div class="col-6 col-lg-2">
+					<p class="text-uppercase fw-semibold mb-3 small">Servizi</p>
+					<div class="d-flex flex-column gap-2">
+					<a href="#" class="text-secondary text-decoration-none small">Siti Vetrina</a>
+					<a href="#" class="text-secondary text-decoration-none small">Web App</a>
+					<a href="#" class="text-secondary text-decoration-none small">Integrazione AI</a>
+					<a href="#" class="text-secondary text-decoration-none small">Consulenza</a>
+					</div>
+				</div> --> <div class="col-6 col-lg-2"> <p class="text-uppercase fw-semibold mb-3 small">Legale</p> <div class="d-flex flex-column gap-2"> <a href="/privacy-policy" class="text-secondary text-decoration-none small">Privacy Policy</a> <a href="/cookie-policy" class="text-secondary text-decoration-none small">Cookie Policy</a> </div> </div> </div> <div class="border-top border-secondary-subtle pt-4 d-flex justify-content-between align-items-center flex-wrap gap-2"> <span class="text-secondary small">&copy; 2026 Pablo. Tutti i diritti riservati.</span> <span class="text-secondary small">P.IVA 10407410967</span> </div> </div> </footer> <!-- <footer class="bg-body-tertiary border-top py-4 mt-5">
+		<div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-body-secondary small">
+		<span>&copy; {new Date().getFullYear()} {SITE_CONFIG.title}. Tutti i diritti riservati.</span>
+		<div class="d-flex gap-3">
+			<a href={`mailto:${SITE_CONFIG.email}`} class="text-body-secondary text-decoration-none">
+				<i class="bi bi-envelope-fill me-1"></i>{SITE_CONFIG.email}
+			</a>
+			<a href={SITE_CONFIG.youtubeUrl} target="_blank" rel="noopener noreferrer" class="text-body-secondary text-decoration-none">
+				<i class="bi bi-youtube me-1"></i>YouTube
+			</a>
+		</div>
+		</div>
+	</footer> --> <script src="/scripts/cookie-consent.js" defer></script> <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> --> <script type="module" src="/_astro/BaseLayout.astro_astro_type_script_index_0_lang.GtM1sxkV.js"></script> <script src="/scripts/main.js" defer></script> </body> </html>
