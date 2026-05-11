@@ -670,20 +670,37 @@ php --ini | grep xdebug
 sudo nano /etc/php.d/15-xdebug.ini
 
 # contenuto da aggiungere
-xdebug.mode = debug
-xdebug.start_with_request = yes
+xdebug.mode = develop,debug
+xdebug.start_with_request = trigger
 xdebug.client_host = localhost
 xdebug.client_port = 9003
 </code></pre>
 <p>Riavviamo apache e controlliamo che sia caricato il modulo xdebug</p>
-<pre><code># Riavviare Apache
+<pre><code class="language-bash"># Riavviare Apache
 sudo systemctl restart httpd php-fpm
 
 # Verificare che Xdebug sia caricato
 php -m | grep xdebug
 </code></pre>
+<p>Per debuggare con vscode</p>
+<ol>
+<li>Installa l’estensione PHP Debug su VS Code</li>
+<li>Crea il launch.json in VS Code: Nella cartella del tuo progetto, VS Code crea automaticamente .vscode/launch.json quando premi F5 → scegli PHP. Il contenuto sarà:</li>
+</ol>
+<pre><code class="language-json">{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Listen for Xdebug",
+            "type": "php",
+            "request": "launch",
+            "port": 9003
+        }
+    ]
+}
+</code></pre>
 <p>Come debug aggiungiamo il file <code>info.php</code> alla cartella <code>/var/www/html</code></p>
-<pre><code>echo "&#x3C;?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
+<pre><code class="language-bash">echo "&#x3C;?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
 sudo chown apache:apache /var/www/html/info.php
 </code></pre>
 <p>Verifica lo stato navigando su <code>http://[server_ip]:[apache_porta]</code></p>

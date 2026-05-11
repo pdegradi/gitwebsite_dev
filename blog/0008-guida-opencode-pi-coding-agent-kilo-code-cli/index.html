@@ -8,56 +8,101 @@
 						<li class="nav-item"> <a class="nav-link" href="https://www.youtube.com/@pablodev-yt" target="_blank" rel="noopener noreferrer"> <i class="bi bi-youtube me-1"></i>YouTube
 </a> </li>  </ul> </div> </div> </nav> <main>  <article class="container py-5"> <div class="mb-4"> <a href="/blog" class="btn btn-outline-secondary btn-sm"> <i class="bi bi-arrow-left me-1"></i>Tutti gli articoli
 </a> </div> <h1 class="mb-2 text-center">Agenti AI: Guida a OpenCode, Pi Coding Agent e Kilo Code CLI</h1> <p class="text-body-secondary mb-4 text-center"> <i class="bi bi-calendar3 me-1"></i> <time datetime="2026-05-08">8 maggio 2026</time> </p> <div class="row justify-content-center"> <div class="col-lg-8"> <img src="/images/blog/coding-agent-minimal.webp" alt="coding agent minimal" class="article-cover rounded mb-4"> <nav id="toc-container" class="card bg-body-tertiary border mt-4 mb-5 p-3" aria-label="Indice dei contenuti"> <h2 class="h4 text-uppercase text-body-secondary mb-3"> <i class="bi bi-list-ul me-1"></i> Indice
-</h2> <ul class="toc-list" id="toc-list"></ul> </nav> <div id="article-content"> <p>Questa guida fornisce un’introduzione pratica e approfondita all’utilizzo di tre potenti strumenti per lo sviluppo assistito dall’IA: OpenCode, Pi Coding Agent e Kilo Code CLI. Ci concentreremo sull’installazione, la configurazione di base, i comandi essenziali, la gestione di skill e sub-agenti, e l’integrazione con servizi esterni per aiutarti a integrare questi agenti di codifica nel tuo flusso di lavoro in modo efficace.</p>
+</h2> <ul class="toc-list" id="toc-list"></ul> </nav> <div id="article-content"> <p>Questa guida fornisce un’introduzione pratica e approfondita all’utilizzo di tre potenti strumenti per lo sviluppo assistito dall’IA: OpenCode, Pi Coding Agent e Kilo Code CLI. Ci concentreremo sull’installazione, la configurazione di base, i comandi essenziali, la gestione di skill e sub-agenti, e l’integrazione con servizi esterni per aiutarti a integrare questi agenti nel tuo flusso di lavoro in modo efficace.</p>
 <h2 id="1-opencode">1. OpenCode</h2>
-<p>OpenCode è un agente di programmazione AI open source disponibile come interfaccia per terminale (TUI), app desktop o estensione per IDE. Si concentra sull’automazione di compiti di codifica e sull’interazione con la codebase tramite linguaggio naturale.</p>
+<p>OpenCode è un agente di programmazione AI open source disponibile come interfaccia per terminale (TUI), app desktop o estensione per IDE.</p>
 <h3 id="11-installazione">1.1 Installazione</h3>
 <p>Il modo più semplice per installare OpenCode è tramite lo script di installazione:</p>
 <pre><code class="language-bash">curl -fsSL https://opencode.ai/install | bash
 </code></pre>
-<p>In alternativa, puoi installarlo con <code>npm</code>:</p>
+<p>In alternativa, previa installazione di nodejs, puoi installarlo con <code>npm</code>:</p>
 <pre><code class="language-bash">npm install -g opencode-ai
 </code></pre>
-<p>Per altre opzioni di installazione (Homebrew, Chocolatey, Scoop, Docker, ecc.) e per Windows, consulta la <a href="https://opencode.ai/docs/it/#install">documentazione ufficiale di OpenCode</a> [1].</p>
+<p>Su sistemi Windows la documentazione ufficiale consiglia si usare <strong><a href="https://learn.microsoft.com/en-us/windows/wsl/install">WSL</a></strong>. Se non sai cosa è WSL ti consiglio questa <a href="/blog/0001-windows-subsystem-of-linux-in-windows-11">guida</a>. In breve dopo aver installato WSL puoi installare OpenCode con</p>
+<pre><code class="language-bash">curl -fsSL https://opencode.ai/install | bash
+</code></pre>
+<p>Da dentro un terminale Linux con WSL naviga nella cartella di interesse ed esegui il comando <strong>opencode</strong></p>
+<pre><code class="language-bash">cd /mnt/c/Users/YourName/project
+opencode
+</code></pre>
+<p>Usando <strong>WSL</strong> i file di configurazione e sessioni sono memorizzati dentro <code>~/.local/share/opencode/</code></p>
 <h3 id="12-configurazione-iniziale">1.2 Configurazione Iniziale</h3>
-<p>Dopo l’installazione, devi configurare un provider LLM. OpenCode supporta vari provider, e puoi connetterti tramite il comando <code>/connect</code> nella TUI (Terminal User Interface):</p>
+<p>Dopo l’installazione, devi configurare un provider LLM. OpenCode supporta vari provider, e puoi connetterti tramite il comando <code>/connect</code> nella TUI:</p>
 <ol>
 <li>Esegui <code>/connect</code> nella TUI di OpenCode.</li>
-<li>Seleziona <code>opencode</code> e vai su <a href="https://opencode.ai/auth">opencode.ai/auth</a> per accedere e ottenere la tua chiave API.</li>
+<li>Seleziona il tuo provider (esempio OpenAI, ANtropic, OpenRouter, eccetera)</li>
 <li>Incolla la chiave API quando richiesto.</li>
 </ol>
+<p>N.B. Nel caso di utilizzo di <strong>Requesty</strong> se vedi un sottoinsieme di modelli (e non tutti i modelli disponibili sul sito)
+li puoi settare andando a modificare il file di configurazione <strong>opencode.json</strong> da creare nella cartella <code>~/.config/opencode/</code>. Inserisci l’API di Requesty e aggiungi nella sezione <strong>models</strong> i modelli desiderati:</p>
+<pre><code class="language-json">{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "requesty-extra": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Requesty (Extra Models)",
+      "options": {
+        "baseURL": "https://router.requesty.ai/v1",
+        "apiKey": "....."
+      },
+      "models": {
+        "zai/GLM-5.1":         { "name": "GLM 5.1 (Zai)" },
+        "inceptron/glm-5.1":   { "name": "GLM 5.1 (Inceptron)" },
+        "novita/zai-org/glm-4.6": { "name": "GLM 4.6 (Novita)" }
+      }
+    }
+  }
+}
+</code></pre>
+<p>Per rendere effettive le modifiche riavvia OpenCode. I nuovi modelli compariranno sotto il gruppo <strong>Requesty (Extra Models)</strong></p>
 <h3 id="13-inizializzazione-del-progetto">1.3 Inizializzazione del Progetto</h3>
 <p>Per utilizzare OpenCode su un progetto esistente:</p>
 <ol>
-<li>Naviga nella directory del tuo progetto:
-<pre><code class="language-bash">cd /path/to/project
-</code></pre>
-</li>
-<li>Avvia OpenCode:
-<pre><code class="language-bash">opencode
-</code></pre>
-</li>
-<li>Inizializza OpenCode per il progetto con il comando <code>/init</code>:
-<pre><code class="language-bash">/init
-</code></pre>
-Questo farà analizzare il progetto a OpenCode e creerà un file <code>AGENTS.md</code> nella root del progetto. Questo aiuta OpenCode a comprendere la struttura e gli stili di codice utilizzati.</li>
+<li>Naviga nella directory del tuo progetto <code>cd /path/to/project</code></li>
+<li>Avvia OpenCode <code>opencode</code></li>
+<li>Inizializza OpenCode per il progetto con il comando <code>/init</code>.
+Questo farà analizzare il progetto a OpenCode e creerà un file <code>AGENTS.md</code> nella root del progetto.
+Questo aiuta OpenCode a comprendere la struttura e gli stili di codice utilizzati.</li>
+</ol>
+<p>Il file <code>AGENTS.md</code> nella root del progetto verrà incluso nel contesto della conversazione. Se hai già un file <code>AGENTS.md</code>, eseguendo il comando <code>init</code>, questo migliorerà il contenuto del file, mantenendo le istruzioni precedentemente contenute.</p>
+<p>Il file <code>AGENTS.md</code> può essere definito in diverse posizioni</p>
+<ol>
+<li>file <code>AGENTS.md</code> nella root del progetto</li>
+<li>file <code>AGENTS.md</code> globale nella cartella <code>~/.config/opencode/</code> che verrà preso in considerazione da ogni sessione opencode</li>
+</ol>
+<p>Opencode può anche leggere i file markdown creati per <strong>Claude Code</strong></p>
+<ol>
+<li><code>CLAUDE.md</code> nella root del progetto, per regole relative a un progetto</li>
+<li><code>~/.claude/CLAUDE.md</code> per regole globali</li>
+<li><code>~/.claude/skills/</code> per le skills degli agents</li>
+</ol>
+<p>L’ordine di precedenza di questi files markdown è il seguente, dove il primo trovato vince su quelli successivi</p>
+<ol>
+<li>File locali <code>AGENTS.md</code>, <code>CLAUDE.md</code></li>
+<li>File globale <code>~/.config/opencode/AGENTS.md</code></li>
+<li>Claude Code file <code>~/.claude/CLAUDE.md</code></li>
 </ol>
 <h3 id="14-comandi-interni-essenziali">1.4 Comandi Interni Essenziali</h3>
-<p>OpenCode include diversi comandi integrati per gestire il flusso di lavoro [2]:</p>
+<p>OpenCode include diversi comandi integrati per gestire il flusso di lavoro:</p>
 <ul>
-<li><code>/init</code>: Inizializza OpenCode per il progetto corrente, creando <code>AGENTS.md</code>.</li>
-<li><code>/undo</code>: Annulla l’ultima serie di modifiche apportate dall’agente.</li>
-<li><code>/redo</code>: Ripristina le modifiche annullate.</li>
-<li><code>/share</code>: Genera un link condivisibile della conversazione corrente.</li>
-<li><code>/help</code>: Mostra la guida e i comandi disponibili.</li>
-<li><code>/connect</code>: Configura i provider LLM e le chiavi API.</li>
+<li><code>/init</code> Inizializza OpenCode per il progetto corrente, creando <code>AGENTS.md</code> nella directory corrente.</li>
+<li><code>/connect</code> Configura i provider LLM e le chiavi API.</li>
+<li><code>&#x3C;TAB></code> Passa dalla modalità <strong>Plan Mode</strong> alla modalità <strong>Build Mode</strong>, e viceversa</li>
+<li><code>/models</code> Mostra i modelli LLM disponibili</li>
+<li><code>/undo</code> Annulla l’ultima serie di modifiche apportate dall’agente.</li>
+<li><code>/redo</code> Ripristina le modifiche annullate.</li>
+<li><code>/compact</code> Compatta facendo un riassunto della sessione corrente</li>
+<li><code>/new</code> avvia una nuova sessione</li>
+<li><code>/sessions</code> mostra le sessioni esistenti, utile anche per cambiare sessione</li>
+<li><code>/help</code> Mostra la guida e i comandi disponibili.</li>
 </ul>
-<h3 id="15-comandi-personalizzati-skills">1.5 Comandi Personalizzati (Skills)</h3>
-<p>Puoi estendere le funzionalità di OpenCode creando comandi personalizzati, simili a
-delle
-“skill”, per automatizzare task ripetitivi. Questi comandi si definiscono tramite file Markdown nella directory <code>commands/</code> (globale in <code>~/.config/opencode/commands/</code> o locale in <code>.opencode/commands/</code>) [2].</p>
-<p>Esempio di creazione di un comando <code>/test</code>:</p>
-<p>Crea il file <code>.opencode/commands/test.md</code>:</p>
+<h3 id="15-pianifica-e-scrivi">1.5 Pianifica e Scrivi</h3>
+<p>Opencode raccomanda prima di richiedere una modifica di pianificare tale modifica. Per fare ciò premi <code>&#x3C;TAB></code> per passare nella modalità <code>Plan</code> di modo da non scrivere modifiche nel codice. Una volta deciso e modificato il piano di azione proposto è possibile scrivere e implementare tali modifiche nel codice. Per fare ciò premere di nuovo <code>&#x3C;TAB></code> per passare alla modalità <code>BUILD</code> e chiedere al modello llm di implemtare tali modifiche.</p>
+<p>Per modifiche più modeste è possibile chiedere direttamente al modello LLM di implemtare le modifiche, senza passare dallo step di <strong>pianificazione</strong>.</p>
+<h3 id="16-comandi-personalizzati">1.6 Comandi Personalizzati</h3>
+<p>Puoi estendere le funzionalità di OpenCode creando comandi personalizzati per automatizzare task ripetitivi.
+Questi comandi si definiscono tramite file Markdown nella directory <code>commands/</code> (globale in <code>~/.config/opencode/commands/</code> o locale in <code>.opencode/commands/</code>).</p>
+<p>Esempio di creazione di un comando <code>.opencode/commands/test.md</code> richiamabile con <code>/test</code>:</p>
 <pre><code class="language-markdown">---
 description: Esegue i test con copertura
 agent: build
@@ -66,36 +111,42 @@ model: anthropic/claude-3-5-sonnet-20241022
 Esegui la suite di test completa con il report di copertura e mostra eventuali fallimenti.
 Concentrati sui test falliti e suggerisci correzioni.
 </code></pre>
-<p>Il frontmatter definisce le proprietà del comando, mentre il contenuto diventa il template del prompt. Puoi eseguire questo comando digitando <code>/test</code> nella TUI.</p>
+<p>Puoi eseguire questo comando digitando <code>/test</code> nella TUI.</p>
 <p>Nei prompt dei comandi personalizzati puoi usare:</p>
 <ul>
 <li><code>$ARGUMENTS</code> o <code>$1</code>, <code>$2</code> per passare argomenti.</li>
 <li><code>!comando</code> per inserire l’output di un comando bash (es. <code>!npm test</code>).</li>
 <li><code>@file</code> per includere il contenuto di un file specifico.</li>
 </ul>
-<h3 id="16-agenti-e-sub-agenti">1.6 Agenti e Sub-agenti</h3>
-<p>OpenCode utilizza agenti specializzati per gestire compiti diversi. Puoi passare da un agente all’altro usando il tasto <strong>Tab</strong> o menzionandoli con <code>@</code> [3].</p>
+<p>Per esempi dettagliati vedere la <a href="https://opencode.ai/docs/commands/">documentazione</a></p>
+<h3 id="17-agenti-e-sub-agenti">1.7 Agenti e Sub-agenti</h3>
+<p>In Opencode esistono due tipi di agenti: <strong>agenti primari</strong> e <strong>sub-agenti</strong>. Questi vengono utilizzati per gestire compiti diversi.</p>
+<p>Con gli agenti primari ci interagisco direttamente. Posso switchare da un agente primario all-altro con il tasto <strong>TAB</strong>. Gli agenti primari pre esistenti sono <strong>BUILD</strong> e <strong>PLAN</strong>:</p>
 <p><strong>Agenti Primari Integrati:</strong></p>
 <ul>
 <li><strong>Build</strong>: L’agente predefinito con tutti gli strumenti abilitati (scrittura, modifica, bash). Ideale per lo sviluppo attivo.</li>
 <li><strong>Plan</strong>: Un agente limitato per la pianificazione e l’analisi. Di default, richiede conferma (<code>ask</code>) per modifiche ai file e comandi bash. Utile per analizzare il codice senza apportare modifiche dirette.</li>
 </ul>
-<p><strong>Sub-agenti Integrati:</strong>
-I sub-agenti possono essere invocati dagli agenti primari o manualmente tramite menzione (es. <code>@general aiutami a cercare questa funzione</code>).</p>
+<p>I sub-agenti vengono invocati dagli agenti primari per compiti specifici. Li posso invocare menzionandoli con il carattere <strong>@</strong> (es. <code>@general aiutami a cercare questa funzione</code>).</p>
+<p>Opencode dispone di 3 sub-agenti installati:</p>
 <ul>
 <li><strong>General</strong>: Agente general-purpose per ricerche complesse e task multi-step. Ha accesso completo agli strumenti (tranne todo).</li>
 <li><strong>Explore</strong>: Agente in sola lettura per esplorare rapidamente la codebase. Non può modificare file.</li>
+<li><strong>Scout</strong>: Agente in sola lettura per esplorare documentazione e dependency</li>
 </ul>
 <p>Puoi creare agenti personalizzati configurandoli nel file <code>opencode.json</code> o creando file Markdown nella directory <code>agents/</code> (es. <code>.opencode/agents/review.md</code>).</p>
-<h3 id="17-integrazione-con-servizi-esterni-mcp">1.7 Integrazione con Servizi Esterni (MCP)</h3>
-<p>OpenCode supporta il Model Context Protocol (MCP) per integrare strumenti e servizi esterni. I server MCP possono essere locali o remoti e si configurano nel file <code>opencode.json</code> (o <code>opencode.jsonc</code>) [4].</p>
+<h3 id="18-integrazione-con-servizi-esterni-mcp">1.8 Integrazione con Servizi Esterni (MCP)</h3>
+<p>OpenCode supporta il Model Context Protocol (MCP) per integrare strumenti e servizi esterni. I server MCP possono essere locali o remoti e si configurano nel file <code>opencode.json</code> (o <code>opencode.jsonc</code>).</p>
 <p><strong>Aggiungere un Server MCP Locale:</strong></p>
 <pre><code class="language-json">{
   "mcp": {
     "mcp_everything": {
       "type": "local",
       "command": ["npx", "-y", "@modelcontextprotocol/server-everything"],
-      "enabled": true
+      "enabled": true,
+      "environment": {
+        "MY_ENV_VAR": "my_env_var_value",
+      }
     }
   }
 }
@@ -106,7 +157,11 @@ I sub-agenti possono essere invocati dagli agenti primari o manualmente tramite 
   "mcp": {
     "my-oauth-server": {
       "type": "remote",
-      "url": "https://mcp.example.com/mcp"
+      "url": "https://mcp.example.com/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer MY_API_KEY"
+      }
     }
   }
 }
@@ -118,9 +173,15 @@ I sub-agenti possono essere invocati dagli agenti primari o manualmente tramite 
 <li><code>opencode mcp logout &#x3C;server-name></code>: Rimuove le credenziali.</li>
 </ul>
 <p>Una volta configurato, puoi chiedere a OpenCode di utilizzare lo strumento MCP nei tuoi prompt (es. <code>usa lo strumento mcp_everything per...</code>).</p>
-<hr>
+<h3 id="19-altro-da-sapere">1.9 Altro da sapere</h3>
+<p>Per fare riferimento a un file nel progetto usare il simbolo <strong>@</strong></p>
+<pre><code>How is auth handled in @packages/functions/src/api/index.ts?
+</code></pre>
+<p>Per eseguire un comando shell, far precedere comando con il simbolo <code>!</code></p>
+<pre><code class="language-bash">!ls -la
+</code></pre>
 <h2 id="2-pi-coding-agent">2. Pi Coding Agent</h2>
-<p>Pi Coding Agent è un agente di codifica open source minimale, focalizzato sull’essere estensibile e self-documenting. A differenza di altri agenti, Pi inizia con un set limitato di strumenti (<code>read</code>, <code>write</code>, <code>edit</code>, <code>bash</code>) e permette agli utenti di costruire il proprio ambiente [5].</p>
+<p>Pi Coding Agent è un agente di codifica open source minimale, focalizzato sull’essere estensibile e self-documenting. A differenza di altri agenti, Pi inizia con un set limitato di strumenti (<code>read</code>, <code>write</code>, <code>edit</code>, <code>bash</code>) e permette agli utenti di costruire il proprio ambiente.</p>
 <h3 id="21-installazione">2.1 Installazione</h3>
 <p>Pi Coding Agent può essere installato globalmente tramite <code>npm</code> o <code>pnpm</code>:</p>
 <pre><code class="language-bash">npm install -g @earendil-works/pi-coding-agent
@@ -136,7 +197,7 @@ pnpm add -g @earendil-works/pi-coding-agent
 <li><strong>Esportazione:</strong> Usa <code>/export</code> per esportare in HTML o <code>/share</code> per creare un gist GitHub condivisibile.</li>
 </ul>
 <h3 id="23-estensioni-skill-e-sub-agenti">2.3 Estensioni, Skill e Sub-agenti</h3>
-<p>Pi non ha funzionalità come sub-agenti o plan mode integrate di default, ma ti permette di costruirle o installarle tramite pacchetti [5].</p>
+<p>Pi non ha funzionalità come sub-agenti o plan mode integrate di default, ma ti permette di costruirle o installarle tramite pacchetti.</p>
 <ul>
 <li><strong>Pacchetti (Packages):</strong> Puoi installare estensioni, skill, prompt e temi tramite npm o git.
 <pre><code class="language-bash">pi install npm:@foo/pi-tools
@@ -144,11 +205,10 @@ pi install git:github.com/badlogic/pi-doom
 </code></pre>
 </li>
 <li><strong>Sub-agenti:</strong> Esistono pacchetti della community (come <code>pi-subagents</code> o <code>@tintinweb/pi-subagents</code>) che aggiungono il supporto per i sub-agenti a Pi. Questi pacchetti definiscono agenti con set di strumenti specifici (es. <code>Explore</code> con solo <code>read</code>, <code>bash</code>, <code>grep</code>, <code>find</code>, <code>ls</code>) [6].</li>
-<li><strong>Integrazione MCP:</strong> Pi supporta l’integrazione con server MCP tramite estensioni specifiche (es. <code>pi-mcp</code>), permettendo di collegarsi a servizi esterni come Chrome DevTools o altri strumenti compatibili con MCP [6].</li>
+<li><strong>Integrazione MCP:</strong> Pi supporta l’integrazione con server MCP tramite estensioni specifiche (es. <code>pi-mcp</code>), permettendo di collegarsi a servizi esterni come Chrome DevTools o altri strumenti compatibili con MCP.</li>
 </ul>
-<hr>
 <h2 id="3-kilo-code-cli">3. Kilo Code CLI</h2>
-<p>Kilo Code CLI è una potente interfaccia a riga di comando che fa parte della piattaforma di ingegneria agentica Kilo. È un fork di OpenCode, migliorato per integrarsi nell’ecosistema Kilo, offrendo funzionalità avanzate di generazione di codice, automazione e debugging [7].</p>
+<p>Kilo Code CLI è una potente interfaccia a riga di comando che fa parte della piattaforma di ingegneria agentica Kilo. È un fork di OpenCode, migliorato per integrarsi nell’ecosistema Kilo, offrendo funzionalità avanzate di generazione di codice, automazione e debugging.</p>
 <h3 id="31-installazione">3.1 Installazione</h3>
 <p>Puoi installare Kilo Code CLI globalmente usando <code>npm</code>:</p>
 <pre><code class="language-bash">npm install -g @kilocode/cli
@@ -160,7 +220,7 @@ pi install git:github.com/badlogic/pi-doom
 <p>Dopo l’installazione, puoi avviare Kilo in qualsiasi directory di progetto:</p>
 <pre><code class="language-bash">kilo
 </code></pre>
-<p>Kilo offre diverse modalità (o agenti) per gestire compiti specifici [7]:</p>
+<p>Kilo offre diverse modalità (o agenti) per gestire compiti specifici:</p>
 <ul>
 <li><strong>Architect (Pianificazione):</strong> Utilizzato per la pianificazione e l’analisi. Simile alla modalità Plan di OpenCode.</li>
 <li><strong>Coder (Codifica):</strong> L’agente principale per la generazione e la modifica del codice.</li>
@@ -168,7 +228,7 @@ pi install git:github.com/badlogic/pi-doom
 </ul>
 <p>Puoi anche creare modalità personalizzate per adattare Kilo al tuo flusso di lavoro.</p>
 <h3 id="33-comandi-cli-utili">3.3 Comandi CLI Utili</h3>
-<p>Kilo Code CLI offre diversi comandi per gestire l’ambiente e le integrazioni [8]:</p>
+<p>Kilo Code CLI offre diversi comandi per gestire l’ambiente e le integrazioni:</p>
 <ul>
 <li><code>kilo run --auto "messaggio"</code>: Esegue Kilo in modalità autonoma (ideale per CI/CD). Disabilita le richieste di permesso.</li>
 <li><code>kilo mcp</code>: Gestisce i server MCP.
@@ -182,17 +242,7 @@ pi install git:github.com/badlogic/pi-doom
 </li>
 </ul>
 <h3 id="34-integrazione-con-servizi-esterni-mcp">3.4 Integrazione con Servizi Esterni (MCP)</h3>
-<p>Come OpenCode, Kilo Code CLI supporta nativamente il Model Context Protocol (MCP). Puoi utilizzare i comandi <code>kilo mcp</code> (descritti sopra) per aggiungere e gestire server MCP, permettendo a Kilo di interagire con API esterne, database e altri strumenti durante la generazione del codice [8].</p>
-<hr>
-<h2 id="riferimenti">Riferimenti</h2>
-<p>[1] <a href="https://opencode.ai/docs/it/">OpenCode Official Documentation - Installazione</a></p>
-<p>[2] <a href="https://opencode.ai/docs/commands/">OpenCode Official Documentation - Comandi</a></p>
-<p>[3] <a href="https://opencode.ai/docs/it/agents/">OpenCode Official Documentation - Agenti</a></p>
-<p>[4] <a href="https://opencode.ai/docs/it/mcp-servers/">OpenCode Official Documentation - Server MCP</a></p>
-<p>[5] <a href="https://pi.dev/">Pi Coding Agent Official Website</a></p>
-<p>[6] <a href="https://pi.dev/packages/pi-subagents">pi-subagents - Pi Coding Agent</a></p>
-<p>[7] <a href="https://github.com/kilo-org/kilocode">Kilo Code CLI GitHub Repository</a></p>
-<p>[8] <a href="https://kilo.ai/docs/code-with-ai/platforms/cli-reference/">CLI Command Reference - Kilo Code</a></p> </div> </div> </div> </article>  </main> <!-- ══ FOOTER ══════════════════════════════════════════════════════ --> <footer class="border-top border-secondary-subtle py-5 mt-5"> <div class="container"> <div class="row gy-4 pb-5"> <div class="col-lg-4"> <p class="fw-semibold text-uppercase small mb-3">Pablo Dev</p> <p class="text-secondary small lh-lg mb-4"> Sviluppo Software Web &amp; AI Integration <!-- Freelance Developer &amp; AI Specialist.<br>
+<p>Come OpenCode, Kilo Code CLI supporta nativamente il Model Context Protocol (MCP). Puoi utilizzare i comandi <code>kilo mcp</code> (descritti sopra) per aggiungere e gestire server MCP, permettendo a Kilo di interagire con API esterne, database e altri strumenti durante la generazione del codice.</p> </div> </div> </div> </article>  </main> <!-- ══ FOOTER ══════════════════════════════════════════════════════ --> <footer class="border-top border-secondary-subtle py-5 mt-5"> <div class="container"> <div class="row gy-4 pb-5"> <div class="col-lg-4"> <p class="fw-semibold text-uppercase small mb-3">Pablo Dev</p> <p class="text-secondary small lh-lg mb-4"> Sviluppo Software Web &amp; AI Integration <!-- Freelance Developer &amp; AI Specialist.<br>
 						Sviluppo Web App e integro l'AI nel tuo business. --> </p> <div class="d-flex gap-3"> <a href="https://github.com/pablodevhub" class="text-secondary"><i class="bi bi-github fs-6"></i></a> <a href="https://www.youtube.com/@pablodev-yt" class="text-secondary"><i class="bi bi-youtube fs-6"></i></a>  <a href="mailto:pablodev@outlook.it" class="text-secondary"><i class="bi bi-envelope fs-6"></i></a> </div> </div> <div class="col-6 col-lg-2 offset-lg-4"> <p class="text-uppercase fw-semibold mb-3 small">Navigazione</p> <div class="d-flex flex-column gap-2"> <a href="/" class="text-secondary text-decoration-none small">Home</a> <a href="/blog" class="text-secondary text-decoration-none small">Blog</a>
 						<a href="/progetti" class="text-secondary text-decoration-none small">Progetti</a>  </div> </div> <!-- <div class="col-6 col-lg-2">
 					<p class="text-uppercase fw-semibold mb-3 small">Servizi</p>
